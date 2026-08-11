@@ -1,2 +1,183 @@
 # local-large-language-models-management
-Local Large Language Models Management
+
+A minimal, reproducible local-LLM stack for a **Mac mini M4 Pro with 24 GB
+unified memory**: [MLXServe](https://mlxserve.com) serving
+[`mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit`](https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit)
+on `http://127.0.0.1:11234` through an OpenAI-compatible API, driven by a
+small wrapper script and a stdlib-only Python smoke client.
+
+Verified on Apple M4 Pro · 14 cores · 24 GiB · macOS 26.5.2 (arm64).
+
+## What is in this repo
+
+- `scripts/mlxserve.sh` — single entry point for install / lifecycle /
+  primary-model / client-smoke operations. Run `scripts/mlxserve.sh --help`
+  for the full subcommand list.
+- `scripts/client_smoke.py` — Python 3 stdlib OpenAI-compatible client
+  (non-streaming + SSE) that validates the Chat Completions contract and
+  exits `0` iff the round-trip succeeds.
+- `memo1.md`, `memo2.md`, `memo3.md` — background rationale (hardware, model
+  choice, MLXServe vs alternatives). Not required to operate the stack.
+- `.mlxserve/` — gitignored runtime state (pid, logs, fixtures).
+
+## Prerequisites
+
+- macOS 26.2 or later on Apple Silicon (MLXServe requirement).
+- Homebrew.
+- Python 3 on `PATH` (system Python 3.9 is sufficient; no `pip` installs).
+- ~20 GB free disk space for the primary model.
+
+## Install
+
+```sh
+scripts/mlxserve.sh install
+```
+
+Taps `ddalcu/mlx-serve`, trusts the tap, and installs the `mlx-serve`
+formula. The binary lands at `/opt/homebrew/bin/mlx-serve`.
+
+## Quickstart
+
+```sh
+# 1. Download the primary model (~17 GB, one-time).
+scripts/mlxserve.sh pull-primary
+
+# 2. Start the server (loopback :11234) with the memory knobs required for
+#    the 24 GB envelope, and load the primary model into memory.
+MLXSERVE_SKIP_MEM_PREFLIGHT=1 scripts/mlxserve.sh start
+scripts/mlxserve.sh load-primary
+
+# 3. Verify with the supported OpenAI-compatible client workflow.
+scripts/mlxserve.sh client-smoke              # non-streaming
+scripts/mlxserve.sh client-smoke --stream     # SSE streaming
+
+# 4. Stop cleanly (releases the port and reclaims wired GPU memory).
+scripts/mlxserve.sh stop
+```
+
+## Operator cheat sheet
+
+| Command | Purpose |
+| --- | --- |
+| `scripts/mlxserve.sh start` | Background start, waits for `/health`. |
+| `scripts/mlxserve.sh status` | pid, host, port, listening socket. |
+| `scripts/mlxserve.sh health` | `curl /health` (exit 0 when healthy). |
+| `scripts/mlxserve.sh logs` | Tail `.mlxserve/mlxserve.log`. |
+| `scripts/mlxserve.sh models` | List models on disk. |
+| `scripts/mlxserve.sh pull-primary` | Download `$MLXSERVE_PRIMARY_MODEL`. |
+| `scripts/mlxserve.sh load-primary` | POST `/v1/load-model` for the primary. |
+| `scripts/mlxserve.sh smoke` | One `/v1/chat/completions` round-trip. |
+| `scripts/mlxserve.sh client-smoke [--stream]` | Full OpenAI-contract client smoke. |
+| `scripts/mlxserve.sh restart` \| `stop` | Lifecycle. |
+
+Key environment overrides (all optional):
+
+- `MLXSERVE_HOST` / `MLXSERVE_PORT` — bind address (defaults: `127.0.0.1:11234`).
+- `MLXSERVE_MODEL_DIR` — model download directory (default: `~/.mlx-serve/models`).
+- `MLXSERVE_PRIMARY_MODEL` — canonical primary model id (see fallback below).
+- `MLXSERVE_MAX_RESIDENT_MEM` — resident-memory cap (default: `20GB`).
+- `MLXSERVE_SKIP_MEM_PREFLIGHT` — set to `1` to bypass the per-load free-RAM
+  gate. Required for the primary model on this 24 GB machine (see below).
+
+## Supported local client workflow
+
+`scripts/client_smoke.py` is the canonical supported consumer. It calls
+`POST http://127.0.0.1:11234/v1/chat/completions` and validates the OpenAI
+Chat Completions response (`choices[0].message.content`, `finish_reason`,
+`usage.{prompt,completion,total}_tokens`).
+
+- **Non-streaming:** `scripts/mlxserve.sh client-smoke` → prints
+  `OK non-streaming  model=… prompt=… completion=… total=… elapsed=… finish=stop`
+  on success. Exit code `0`.
+- **Streaming (SSE):** `scripts/mlxserve.sh client-smoke --stream` → prints
+  `OK streaming      frames=… chars=… elapsed=…`, having verified the
+  `[DONE]` sentinel and delta reassembly. Exit code `0`.
+- **Failure signal:** any HTTP / URL / JSON / contract violation exits
+  non-zero with a `FAIL: …` line on stderr. Safe to use as an automation
+  gate.
+
+Any OpenAI-SDK-shaped client (Claude Code with `ANTHROPIC_BASE_URL` remapped,
+Continue, OpenCode, custom Python/TS clients) is a supported consumer of the
+same endpoint.
+
+## Memory and stability envelope (24 GB M4 Pro)
+
+The primary model is at the upper edge of what runs comfortably on 24 GB.
+Observed during Waves 1–3 verification:
+
+| Phase | Wired memory | Free memory |
+| --- | --- | --- |
+| Server started, no model | ~2.0 GB | ~316 MB free (plus idle inactive) |
+| After `/v1/load-model` (ready) | ~18.5 GB | ~500 MB – 2 MB |
+| After two `/v1/chat/completions` | ~18.5 GB (flat) | stable |
+| After `scripts/mlxserve.sh stop` | ~2.0 GB | ~4 GB (fully reclaimed) |
+
+- `bytes_resident` for the loaded model: **17.18 GB** (matches the ~17.2 GB
+  weight budget in `memo3.md`).
+- Load time: ~7–12 s cold.
+- Decode: ~90–94 tok/s on the primary model.
+- **Effective per-request `context_length` is dynamic**: MLXServe auto-shrinks
+  the KV budget to keep it inside `MLXSERVE_MAX_RESIDENT_MEM`. Long prompts
+  may be truncated silently; raise the cap or enable KV quantisation via
+  `MLXSERVE_EXTRA_ARGS` if longer prompts are required, and re-verify
+  headroom.
+- **The two memory knobs are load-blocking by default**:
+  - MLXServe's built-in ~14 GB resident cap refuses the ~17.6 GB primary
+    model → `MLXSERVE_MAX_RESIDENT_MEM=20GB` is the wrapper default.
+  - MLXServe's per-load free-RAM pre-flight uses "currently free" pages and
+    ignores reclaimable inactive/file-cache pages, so it refuses loads that
+    in fact fit → set `MLXSERVE_SKIP_MEM_PREFLIGHT=1` for the primary model.
+- **Concurrent memory-hungry apps (browser, Docker, large IDEs) can OOM the
+  load** at this envelope. Close them before `load-primary`, or use the
+  fallback tier below.
+
+## Fallback path (spec acceptance criterion 7)
+
+If the primary model is too memory-constrained or unstable on this 24 GB
+machine, keep MLXServe and switch to a smaller MLX Qwen 14B 4-bit model.
+`memo3.md` marks the Qwen 14B 4-bit tier as the comfortable fallback.
+
+```sh
+# 1. Pick an available MLX Qwen 14B 4-bit build under mlx-community/... on
+#    Hugging Face. The exact repo id changes over time; confirm the id
+#    exists (e.g. via https://huggingface.co/mlx-community?search=Qwen3+14B)
+#    before running `pull-primary`.
+export MLXSERVE_PRIMARY_MODEL=mlx-community/<qwen-14b-4bit-repo-id>
+
+# 2. Pull it, restart the server, load it, verify via the client smoke.
+scripts/mlxserve.sh pull-primary
+scripts/mlxserve.sh restart
+scripts/mlxserve.sh load-primary
+scripts/mlxserve.sh client-smoke
+```
+
+Notes:
+
+- Use `scripts/mlxserve.sh models` after the pull to confirm the download.
+- With a ~14B 4-bit model (roughly 8–10 GB of weights) you can typically
+  drop `MLXSERVE_SKIP_MEM_PREFLIGHT` and lower `MLXSERVE_MAX_RESIDENT_MEM`
+  (e.g. `12GB`) to leave more headroom for desktop apps. Re-verify with
+  `scripts/mlxserve.sh client-smoke` after tuning.
+- The fallback is a **model swap only**; MLXServe, the wrapper, and the
+  client-smoke workflow are unchanged.
+- If neither model is workable during normal desktop use, follow the spec's
+  rollback plan: `scripts/mlxserve.sh stop` and treat the local stack as an
+  isolated experiment rather than a daily-workflow dependency.
+
+## Note on Augment Intent
+
+Direct Augment Intent → local endpoint routing (pointing the desktop app at
+`http://127.0.0.1:11234/v1`) is **not verified** by this project. `memo2.md`
+covers the reasoning: MLXServe exposes an OpenAI-compatible surface, but
+Augment Intent BYO-endpoint support has not been demonstrated end-to-end
+here. Any such claim should be re-verified before it is documented.
+
+The verified consumers of the local endpoint in this repo are
+`scripts/client_smoke.py` and any OpenAI-SDK-shaped client using the same
+URL and model id.
+
+## References
+
+- MLXServe: <https://mlxserve.com> · <https://github.com/ddalcu/mlx-serve>
+- Primary model: <https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit>
+- Background rationale: `memo1.md`, `memo2.md`, `memo3.md`
