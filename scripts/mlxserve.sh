@@ -15,6 +15,8 @@
 #   pull-primary  Download the primary smart-coding model into the model dir
 #   load-primary  Ask the running server to load the primary model into memory
 #   smoke         Send one /v1/chat/completions request to the primary model
+#   client-smoke  Run scripts/client_smoke.py against the running server
+#                 (stdlib-only OpenAI-compatible client; add --stream for SSE)
 #
 # Defaults (override via env vars):
 #   MLXSERVE_HOST=127.0.0.1
@@ -191,6 +193,16 @@ JSON
     echo
 }
 
+cmd_client_smoke() {
+    is_running || die "MLXServe is not running. Start it first: $0 start"
+    local script="$ROOT_DIR/scripts/client_smoke.py"
+    [ -f "$script" ] || die "Missing $script"
+    log "Client smoke against $HOST:$PORT (model=$PRIMARY_MODEL)"
+    MLXSERVE_HOST="$HOST" MLXSERVE_PORT="$PORT" \
+        MLXSERVE_PRIMARY_MODEL="$PRIMARY_MODEL" \
+        python3 "$script" "$@"
+}
+
 cmd_foreground() {
     require_bin
     log "Foreground: mlx-serve on $HOST:$PORT (max-resident-mem=$MAX_RESIDENT_MEM, skip-mem-preflight=$SKIP_MEM_PREFLIGHT)"
@@ -210,7 +222,8 @@ case "${1:-}" in
     pull-primary) cmd_pull_primary ;;
     load-primary) cmd_load_primary ;;
     smoke)        cmd_smoke ;;
+    client-smoke) shift; cmd_client_smoke "$@" ;;
     ""|-h|--help|help)
-        sed -n '2,32p' "$0"; exit 0 ;;
+        sed -n '2,34p' "$0"; exit 0 ;;
     *) die "Unknown subcommand: $1 (see --help)" ;;
 esac
