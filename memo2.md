@@ -24,7 +24,7 @@ Mac Mini M4 Pro
           │
           └── fallback: Augment cloud models
 ```
-Where MLXServe is especially attractive
+## Where MLXServe is especially attractive
 
 Compared with simply running mlx-lm yourself, MLXServe provides exactly the abstraction I would want for your local-LLM setup: model management plus a stable API in front of MLX. It also supports Ollama-compatible APIs, OpenAI Chat Completions/Responses and Anthropic Messages. 
 
@@ -42,7 +42,7 @@ MLXServe ────────┼─ Continue
 ```
 Claude Code, for example, is explicitly supported simply by redirecting ANTHROPIC_BASE_URL to MLXServe. 
 
-The Augment problem
+## The Augment problem
 
 This is the part I would investigate before changing anything about your Augment subscription.
 
