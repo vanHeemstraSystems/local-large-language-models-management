@@ -2,6 +2,10 @@
 
 I watched https://www.youtube.com/watch?v=XVwMi_UOfsQ and it recommends https://huggingface.co/Qwen/Qwen3-30B-A3B for local LLM on my Mac Mini M4 Pro. Please elaborate how this would save me money expenditure on the use of Augment Code Intent.
 
+## Watch also
+
+Total Beginners Guide to Local AI on Mac at https://www.youtube.com/watch?v=ExovHG5FT6s
+
 # Response:
 
 Yes. The interesting part is not merely “run Qwen locally instead of paying for an API.” For your setup, the potentially valuable architecture is:
