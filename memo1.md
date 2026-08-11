@@ -4,7 +4,9 @@ I watched https://www.youtube.com/watch?v=XVwMi_UOfsQ and it recommends https://
 
 ## Watch also
 
-Total Beginners Guide to Local AI on Mac at https://www.youtube.com/watch?v=ExovHG5FT6s
+- Total Beginners Guide to Local AI on Mac at https://www.youtube.com/watch?v=ExovHG5FT6s
+
+- MLXServe at https://mlxserve.com
 
 # Response:
 
