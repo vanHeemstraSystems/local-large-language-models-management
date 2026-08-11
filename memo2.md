@@ -54,15 +54,15 @@ There are also community questions specifically asking Augment for self-hosted/B
 
 So I would distinguish two questions:
 
-| Question | Assessment |
-| —- | —- |
-| Is MLXServe good for your M4 Pro? | Yes, very promising |
-| Can it serve Qwen locally? | Yes |
-| OpenAI-compatible API? | Yes |
-| Anthropic-compatible API? | Yes |
-| Good foundation for local coding agents? | Yes |
-| Can Augment Intent directly consume it? | Not yet established |
-| Will it therefore immediately reduce your Augment bill? | Not necessarily |
+| Question | Assessment |  
+| —- | —- |  
+| Is MLXServe good for your M4 Pro? | Yes, very promising |  
+| Can it serve Qwen locally? | Yes |  
+| OpenAI-compatible API? | Yes |  
+| Anthropic-compatible API? | Yes |  
+| Good foundation for local coding agents? | Yes |  
+| Can Augment Intent directly consume it? | Not yet established |  
+| Will it therefore immediately reduce your Augment bill? | Not necessarily |  
 
 There is nevertheless a compelling strategy here. Instead of thinking “replace Augment with MLXServe,” I’d think:
 
