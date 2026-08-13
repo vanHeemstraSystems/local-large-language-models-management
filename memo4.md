@@ -1,13 +1,13 @@
 Memo: Local LLM Development Stack with Eigent, MLX and Augment
 
-Repository: vanHeemstraSystems/local-large-language-models-management
-File: memo4.md
-Status: Implementation proposal
-Date: 2026-08-13
+Repository: vanHeemstraSystems/local-large-language-models-management  
+File: memo4.md  
+Status: Implementation proposal  
+Date: 2026-08-13  
 
 ⸻
 
-1. Purpose
+# 1. Purpose
 
 This memo defines an implementable approach for building a local AI-assisted software engineering environment on an Apple Silicon Mac mini.
 
@@ -29,7 +29,7 @@ The implementation must be measurable. We should be able to determine how much w
 
 ⸻
 
-2. Hardware Baseline
+# 2. Hardware Baseline
 
 The initial implementation target is:
 
@@ -63,7 +63,7 @@ However, actual memory consumption and performance on the 24 GB machine must be 
 
 ⸻
 
-3. Strategic Architecture
+# 3. Strategic Architecture
 
 The desired architecture is:
 
@@ -97,7 +97,7 @@ This produces two complementary engineering paths.
 
 ⸻
 
-4. Local Path
+# 4. Local Path
 
 The local path should eventually resemble:
 
@@ -138,7 +138,7 @@ This means Eigent should be viewed primarily as an agent orchestration and execu
 
 ⸻
 
-5. Premium Path
+# 5. Premium Path
 
 Augment Code Intent remains available:
 
@@ -171,7 +171,7 @@ Use local inference by default where it is sufficiently capable; escalate to Aug
 
 ⸻
 
-6. Why Eigent
+# 6. Why Eigent
 
 Eigent is attractive because it addresses a different layer from the LLM runtime.
 
@@ -205,7 +205,7 @@ Eigent should therefore initially be evaluated as the agent/workspace layer abov
 
 ⸻
 
-7. Why Qwen3-30B-A3B
+# 7. Why Qwen3-30B-A3B
 
 The initial model candidate is:
 
@@ -235,7 +235,7 @@ The first implementation should use a proven MLX-compatible quantized version ra
 
 ⸻
 
-8. Local Model Serving Layer
+# 8. Local Model Serving Layer
 
 The model serving layer should be treated as replaceable infrastructure.
 
@@ -281,7 +281,7 @@ MLX should receive particular attention because the hardware is Apple Silicon.
 
 ⸻
 
-9. Why the API Boundary Matters
+# 9. Why the API Boundary Matters
 
 Avoid tightly coupling Eigent to a specific runtime.
 
@@ -312,7 +312,7 @@ It also allows additional models to be introduced later.
 
 ⸻
 
-10. Repository Structure
+# 10. Repository Structure
 
 The local-large-language-models-management repository should become the source of truth for the local LLM environment.
 
@@ -371,7 +371,7 @@ The initial objective is a reproducible vertical slice.
 
 ⸻
 
-11. Phase 1 — Establish the Baseline
+# 11. Phase 1 — Establish the Baseline
 
 Before installing anything new, record the baseline.
 
@@ -406,7 +406,7 @@ Without this information, later cost savings cannot be demonstrated.
 
 ⸻
 
-12. Phase 2 — Establish Local Qwen Inference
+# 12. Phase 2 — Establish Local Qwen Inference
 
 Do not introduce Eigent yet.
 
@@ -455,7 +455,7 @@ First establish a reproducible working configuration.
 
 ⸻
 
-13. Phase 3 — Runtime Bake-Off
+# 13. Phase 3 — Runtime Bake-Off
 
 Once one runtime works, compare alternatives.
 
@@ -491,7 +491,7 @@ If another runtime provides nearly equivalent performance with dramatically simp
 
 ⸻
 
-14. Phase 4 — Standardize the Local API
+# 14. Phase 4 — Standardize the Local API
 
 Once the initial runtime is selected, define a stable configuration.
 
@@ -523,7 +523,7 @@ Commit only the example.
 
 ⸻
 
-15. Phase 5 — Install Eigent
+# 15. Phase 5 — Install Eigent
 
 After local inference works independently, install Eigent.
 
@@ -564,7 +564,7 @@ Pin versions wherever practical.
 
 ⸻
 
-16. Phase 6 — Connect Eigent to Qwen
+# 16. Phase 6 — Connect Eigent to Qwen
 
 Now connect the two systems:
 
@@ -594,7 +594,7 @@ Only after simple inference works should tools and repository access be introduc
 
 ⸻
 
-17. Phase 7 — Repository Agent
+# 17. Phase 7 — Repository Agent
 
 The next milestone is local repository understanding.
 
@@ -628,7 +628,7 @@ Use a disposable branch or test repository.
 
 ⸻
 
-18. Phase 8 — Shell and Test Agent
+# 18. Phase 8 — Shell and Test Agent
 
 Introduce controlled command execution.
 
@@ -673,7 +673,7 @@ Destructive commands should require explicit approval.
 
 ⸻
 
-19. Phase 9 — MCP
+# 19. Phase 9 — MCP
 
 MCP should become the preferred integration boundary for external capabilities where suitable.
 
@@ -704,7 +704,7 @@ This avoids hard-coding every capability into an individual agent.
 
 ⸻
 
-20. Phase 10 — Agent Roles
+# 20. Phase 10 — Agent Roles
 
 Do not begin with a large agent hierarchy.
 
@@ -753,7 +753,7 @@ Review Agent
 
 ⸻
 
-21. Human-in-the-Loop Requirement
+# 21. Human-in-the-Loop Requirement
 
 The initial environment should operate as:
 
@@ -791,7 +791,7 @@ Autonomy can be increased later based on evidence.
 
 ⸻
 
-22. The Augment Escalation Policy
+# 22. The Augment Escalation Policy
 
 The environment needs a clear rule for when to stop using the local agent.
 
@@ -833,7 +833,7 @@ This policy should be refined using benchmark data.
 
 ⸻
 
-23. Benchmark Against Augment
+# 23. Benchmark Against Augment
 
 This is one of the most important phases.
 
@@ -863,7 +863,7 @@ Avoid using the result of one system to improve the prompt given to the other.
 
 ⸻
 
-24. Scorecard
+# 24. Scorecard
 
 For every task record:
 
@@ -901,7 +901,7 @@ Example:
 
 ⸻
 
-25. The Metric That Matters
+# 25. The Metric That Matters
 
 Do not optimize only for token price.
 
@@ -933,7 +933,7 @@ rather than simply:
 
 ⸻
 
-26. Augment Cost Reduction
+# 26. Augment Cost Reduction
 
 Once sufficient measurements exist, classify work.
 
@@ -962,7 +962,7 @@ The target is to increase Class A and Class B over time.
 
 ⸻
 
-27. Cost Dashboard
+# 27. Cost Dashboard
 
 The repository should eventually maintain monthly measurements.
 
@@ -986,7 +986,7 @@ This turns local LLM adoption into a measurable engineering investment.
 
 ⸻
 
-28. Local Operating Cost
+# 28. Local Operating Cost
 
 Local inference should not literally be recorded as zero cost.
 
@@ -1011,7 +1011,7 @@ That is the economic advantage we are exploiting.
 
 ⸻
 
-29. Model Routing
+# 29. Model Routing
 
 Qwen3-30B-A3B should be the first model, not necessarily the only model.
 
@@ -1047,7 +1047,7 @@ Do not introduce routing until the single-model implementation works reliably.
 
 ⸻
 
-30. Context Is the Main Research Problem
+# 30. Context Is the Main Research Problem
 
 The largest gap between the local stack and Augment is unlikely to be raw text generation.
 
@@ -1091,7 +1091,7 @@ This should be considered a strategic workstream.
 
 ⸻
 
-31. Security
+# 31. Security
 
 All local services should default to:
 
@@ -1121,7 +1121,7 @@ personal access tokens
 
 ⸻
 
-32. Logging
+# 32. Logging
 
 Every experiment should be reproducible.
 
@@ -1145,7 +1145,7 @@ Do not log secrets or sensitive source material unnecessarily.
 
 ⸻
 
-33. Health Check
+# 33. Health Check
 
 Provide:
 
@@ -1169,7 +1169,7 @@ followed by a clear status report.
 
 ⸻
 
-34. Start and Stop
+#34. Start and Stop
 
 Aim for:
 
@@ -1194,7 +1194,7 @@ Do not implement convenience wrappers until the underlying commands are understo
 
 ⸻
 
-35. Reproducibility
+# 35. Reproducibility
 
 The repository should contain enough information to rebuild the environment from scratch.
 
@@ -1224,7 +1224,7 @@ No critical setup step should exist only in someone’s memory.
 
 ⸻
 
-36. Implementation Order
+# 36. Implementation Order
 
 Follow this order strictly:
 
@@ -1264,7 +1264,7 @@ Each step must leave behind a working system.
 
 ⸻
 
-37. First Milestone
+# 37. First Milestone
 
 The first milestone is deliberately modest.
 
@@ -1298,7 +1298,7 @@ Acceptance criteria:
 
 ⸻
 
-38. Second Milestone
+# 38. Second Milestone
 
 Milestone M2 — Eigent Local Agent
 
@@ -1322,7 +1322,7 @@ Acceptance criteria:
 
 ⸻
 
-39. Third Milestone
+#39. Third Milestone
 
 Milestone M3 — Repository Task
 
@@ -1349,7 +1349,7 @@ The output must result in an inspectable Git diff.
 
 ⸻
 
-40. Fourth Milestone
+# 40. Fourth Milestone
 
 Milestone M4 — Augment Bake-Off
 
@@ -1372,7 +1372,7 @@ What percentage of current development work can be moved to the local stack with
 
 ⸻
 
-41. Fifth Milestone
+# 41. Fifth Milestone
 
 Milestone M5 — Local-First Workflow
 
@@ -1399,7 +1399,7 @@ This marks the transition from experimentation to operational use.
 
 ⸻
 
-42. Success Criteria
+# 42. Success Criteria
 
 The project is successful when:
 
@@ -1417,7 +1417,7 @@ The project is successful when:
 
 ⸻
 
-43. Non-Goals
+# 43. Non-Goals
 
 Initially, do not attempt to:
 
@@ -1436,7 +1436,7 @@ These can be considered after the core hypothesis has been proven.
 
 ⸻
 
-44. Guiding Principle
+# 44. Guiding Principle
 
 The architecture should remain deliberately modular:
 
@@ -1466,7 +1466,7 @@ Every layer should be replaceable without rebuilding the entire stack.
 
 ⸻
 
-45. Expected End State
+# 45. Expected End State
 
 The eventual development environment should feel approximately like this:
 
@@ -1508,7 +1508,7 @@ The local machine therefore becomes an AI engineering compute resource, rather t
 
 ⸻
 
-46. Decision
+# 46. Decision
 
 Proceed with the architecture.
 
@@ -1533,7 +1533,7 @@ If the benchmark confirms that hypothesis, the architecture should substantially
 
 ⸻
 
-47. Immediate Next Action
+# 47. Immediate Next Action
 
 Do not start with Eigent.
 
@@ -1576,7 +1576,7 @@ Only after this experiment passes should the implementation proceed upward towar
 
 ⸻
 
-References
+# References
 
 * Eigent: https://www.eigent.ai/
 * Eigent GitHub repository: https://github.com/eigent-ai/eigent
