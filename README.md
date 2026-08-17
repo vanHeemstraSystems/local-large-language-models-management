@@ -33,7 +33,7 @@ Taps `ddalcu/mlx-serve`, trusts the tap, and installs the `mlx-serve`formula. Th
 scripts/mlxserve.sh pull-primary
 
 # 2. Start the server (loopback :11234) with the verified defaults baked in
-#    for the 24 GB envelope (--max-resident-mem 20GB, --skip-mem-preflight,
+#    for the 24 GB envelope (--max-resident-mem 18GB, --skip-mem-preflight,
 #    --ctx-size 16384, --max-tokens 1536, --kv-quant 4, --prefill-chunk 1024)
 #    and load the primary model into memory. No ad hoc env vars required.
 scripts/mlxserve.sh start
@@ -67,7 +67,7 @@ Key environment overrides (all optional):
 - `MLXSERVE_HOST` / `MLXSERVE_PORT` — bind address (defaults: `127.0.0.1:11234`).
 - `MLXSERVE_MODEL_DIR` — model download directory (default: `~/.mlx-serve/models`).
 - `MLXSERVE_PRIMARY_MODEL` — canonical primary model id (see fallback below).
-- `MLXSERVE_MAX_RESIDENT_MEM` — resident-memory cap (default: `20GB`).
+- `MLXSERVE_MAX_RESIDENT_MEM` — resident-memory cap (default: `18GB`, safety-revised from `20GB` after the 2026-08-17 kernel panic; see the safety note below).
 - `MLXSERVE_SKIP_MEM_PREFLIGHT` — `1` (default) passes `--skip-mem-preflight` to bypass the per-load free-RAM gate that the primary model trips on this 24 GB machine. Set to `0` to re-enable the built-in load gate.
 - `MLXSERVE_CTX_SIZE` — `--ctx-size` (default: `16384`). The enforced KV/prompt cap. See the honesty note below on the practical accepted-prompt ceiling.
 - `MLXSERVE_MAX_TOKENS` — `--max-tokens` (default: `1536`). Default per-request output cap.
@@ -98,7 +98,7 @@ Any OpenAI-SDK-shaped client (Claude Code with `ANTHROPIC_BASE_URL` remapped,Con
   | `--max-tokens` | 1536 |
   | `--kv-quant` | 4 |
   | `--prefill-chunk` | 1024 |
-  | `--max-resident-mem` | 20GB |
+  | `--max-resident-mem` | 18GB (safety-revised from 20GB) |
   | `--skip-mem-preflight` | on (per-load free-RAM gate bypassed) |
   | OpenCode provider limits | context 16384 / output 1536 |
 
@@ -124,9 +124,17 @@ The primary model is at the upper edge of what runs comfortably on 24 GB.Observe
 - **`--skip-mem-preflight` does NOT bypass the per-request GPU-memory gate.** It only bypasses the one-shot free-RAM check at model *load* time. The per-request gate is enforced by the runtime and is what caps effective prompts even under `--skip-mem-preflight`.
 - **The startup line `Model context length: 4096 tokens` is cosmetic.** It is an internal display value in the `mlx-serve 26.8.7` binary that appears on every startup regardless of `--ctx-size`. It does not gate requests; the model's `config.json` declares `max_position_embeddings=262144`, and the enforced cap is `--ctx-size` (currently 16384).
 - **The two memory knobs are load-blocking by default**:
-  - MLXServe's built-in ~14 GB resident cap refuses the ~17.6 GB primarymodel → `MLXSERVE_MAX_RESIDENT_MEM=20GB` is the wrapper default.
+  - MLXServe's built-in ~14 GB resident cap refuses the ~17.6 GB primarymodel → `MLXSERVE_MAX_RESIDENT_MEM=18GB` is the wrapper default (safety-revised from 20GB; see the safety note below).
   - MLXServe's per-load free-RAM pre-flight uses "currently free" pages andignores reclaimable inactive/file-cache pages, so it refuses loads thatin fact fit → `MLXSERVE_SKIP_MEM_PREFLIGHT=1` is the wrapper default.
 - **Concurrent memory-hungry apps (browser, Docker, large IDEs) can OOM theload** at this envelope. Close them before `load-primary`, or use thefallback tier below.
+
+## Safety note: 18GB resident cap (2026-08-17 revision)
+
+On 2026-08-17 the Mac suffered a full macOS kernel panic during a modest MLXServe workload (8,260-token prompt, streaming, speculative decoding active). The panic report was `"completeMemory() prepare count underflow" @IOGPUMemory.cpp:550` in Apple's `com.apple.iokit.IOGPUFamily` driver, with `mlx-serve` listed as the panicked task. mlx-serve was the panicked task and generated the associated GPU workload/state, but the panic itself occurred inside Apple's IOGPUFamily driver. The evidence does NOT yet establish whether the underlying defect is in MLXServe, MLX, Metal/IOGPUFamily, or an interaction among them — do not describe MLXServe as definitively containing the root-cause bug.
+
+Operating principle after this event: **machine stability outranks maximizing resident model memory or context capacity.** The wrapper's `MLXSERVE_MAX_RESIDENT_MEM` default was therefore reduced from `20GB` to `18GB`. All other frozen-baseline flags are unchanged (`--ctx-size 16384`, `--max-tokens 1536`, `--kv-quant 4`, `--prefill-chunk 1024`, `--skip-mem-preflight`). Note that mlx-serve derives its `[wired] mode=max limit=18186 MB` ceiling independently of this flag, so the log line looks identical at 18GB and 20GB; the registry line (`max_resident_mem=18.0 GB`) is the visible change. Rationale, layered failure modes, and the one-variable-at-a-time / stop-rule discipline governing further tuning are recorded in `STRATEGY.md`.
+
+
 
 ## Fallback path (spec acceptance criterion 7)
 

@@ -24,8 +24,15 @@
 #   MLXSERVE_MODEL_DIR=$HOME/.mlx-serve/models
 #   MLXSERVE_EXTRA_ARGS=""   # appended to `mlx-serve --serve ...`
 #   MLXSERVE_PRIMARY_MODEL=mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit
-#   MLXSERVE_MAX_RESIDENT_MEM=20GB   # tuned for a 24 GB Mac + ~17.6 GB primary
-#                                    # weights, leaving ~4 GB for macOS + apps.
+#   MLXSERVE_MAX_RESIDENT_MEM=18GB   # Safety-revised default (was 20GB). A
+#                                    # 2026-08-17 kernel panic in Apple's
+#                                    # IOGPUFamily driver (IOGPUMemory.cpp:550)
+#                                    # while mlx-serve was the panicked task
+#                                    # invalidated the 20GB baseline; 18GB
+#                                    # trades a smaller wired-memory ceiling
+#                                    # for machine stability headroom. Root
+#                                    # cause (MLXServe / MLX / Metal /
+#                                    # IOGPUFamily / interaction) undetermined.
 #                                    # Set to "auto" to defer to mlx-serve.
 #   MLXSERVE_SKIP_MEM_PREFLIGHT=1    # 1 = pass --skip-mem-preflight (bypass the
 #                                    # conservative per-load "free RAM now" gate
@@ -57,7 +64,7 @@ PORT="${MLXSERVE_PORT:-11234}"
 MODEL_DIR="${MLXSERVE_MODEL_DIR:-$HOME/.mlx-serve/models}"
 EXTRA_ARGS="${MLXSERVE_EXTRA_ARGS:-}"
 PRIMARY_MODEL="${MLXSERVE_PRIMARY_MODEL:-mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit}"
-MAX_RESIDENT_MEM="${MLXSERVE_MAX_RESIDENT_MEM:-20GB}"
+MAX_RESIDENT_MEM="${MLXSERVE_MAX_RESIDENT_MEM:-18GB}"
 SKIP_MEM_PREFLIGHT="${MLXSERVE_SKIP_MEM_PREFLIGHT:-1}"
 CTX_SIZE="${MLXSERVE_CTX_SIZE:-16384}"
 MAX_TOKENS="${MLXSERVE_MAX_TOKENS:-1536}"
