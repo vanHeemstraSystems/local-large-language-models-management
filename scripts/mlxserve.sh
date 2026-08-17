@@ -37,7 +37,7 @@
 #                                    # Wave B measured accepted-prompt ceiling
 #                                    # is ~13.5K tokens at max_tokens=256 under
 #                                    # this ctx and MLXSERVE_PREFILL_CHUNK.
-#   MLXSERVE_MAX_TOKENS=1024         # --max-tokens: default per-request output
+#   MLXSERVE_MAX_TOKENS=1536         # --max-tokens: default per-request output
 #                                    # cap used by the server.
 #   MLXSERVE_KV_QUANT=4              # --kv-quant: KV cache quantisation (bits).
 #                                    # 4-bit keeps the 16K KV budget on-device.
@@ -60,7 +60,7 @@ PRIMARY_MODEL="${MLXSERVE_PRIMARY_MODEL:-mlx-community/Qwen3-Coder-30B-A3B-Instr
 MAX_RESIDENT_MEM="${MLXSERVE_MAX_RESIDENT_MEM:-20GB}"
 SKIP_MEM_PREFLIGHT="${MLXSERVE_SKIP_MEM_PREFLIGHT:-1}"
 CTX_SIZE="${MLXSERVE_CTX_SIZE:-16384}"
-MAX_TOKENS="${MLXSERVE_MAX_TOKENS:-1024}"
+MAX_TOKENS="${MLXSERVE_MAX_TOKENS:-1536}"
 KV_QUANT="${MLXSERVE_KV_QUANT:-4}"
 PREFILL_CHUNK="${MLXSERVE_PREFILL_CHUNK:-1024}"
 
