@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "mlxserve/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit",
+
+  "enabled_providers": ["mlxserve"],
+
+  "provider": {
+    "mlxserve": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Local MLXServe",
+
+      "options": {
+        "baseURL": "http://127.0.0.1:11234/v1",
+        "timeout": 300000
+      },
+
+      "models": {
+        "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit": {
+          "name": "Qwen3 Coder 30B A3B 4-bit",
+          "limit": {
+            "context": 16384,
+            "output": 1536
+          }
+        }
+      }
+    }
+  }
+}
