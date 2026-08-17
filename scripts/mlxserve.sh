@@ -33,12 +33,21 @@
 #                                    # Default 1 for the primary-model workflow
 #                                    # on this 24 GB machine. Set to 0 to
 #                                    # re-enable the built-in load gate.
-#   MLXSERVE_CTX_SIZE=8192           # --ctx-size: enforced KV cache/prompt cap.
-#                                    # Verified working ceiling on this machine.
+#   MLXSERVE_CTX_SIZE=16384          # --ctx-size: enforced KV cache/prompt cap.
+#                                    # Wave B measured accepted-prompt ceiling
+#                                    # is ~13.5K tokens at max_tokens=256 under
+#                                    # this ctx and MLXSERVE_PREFILL_CHUNK.
 #   MLXSERVE_MAX_TOKENS=1024         # --max-tokens: default per-request output
 #                                    # cap used by the server.
 #   MLXSERVE_KV_QUANT=4              # --kv-quant: KV cache quantisation (bits).
-#                                    # 4-bit keeps the 8K KV budget on-device.
+#                                    # 4-bit keeps the 16K KV budget on-device.
+#   MLXSERVE_PREFILL_CHUNK=1024      # --prefill-chunk: max tokens forwarded per
+#                                    # prefill chunk. Wave B: lowering this from
+#                                    # the mlx-serve 8192 default is the single
+#                                    # biggest lever against the per-request
+#                                    # GPU-memory gate; 1024 lifts the accepted
+#                                    # prompt ceiling from ~4K (default 8192)
+#                                    # to ~13.5K on this 24 GB machine.
 #
 # State (gitignored) lives under .mlxserve/ in the repo root.
 set -euo pipefail
@@ -50,20 +59,23 @@ EXTRA_ARGS="${MLXSERVE_EXTRA_ARGS:-}"
 PRIMARY_MODEL="${MLXSERVE_PRIMARY_MODEL:-mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit}"
 MAX_RESIDENT_MEM="${MLXSERVE_MAX_RESIDENT_MEM:-20GB}"
 SKIP_MEM_PREFLIGHT="${MLXSERVE_SKIP_MEM_PREFLIGHT:-1}"
-CTX_SIZE="${MLXSERVE_CTX_SIZE:-8192}"
+CTX_SIZE="${MLXSERVE_CTX_SIZE:-16384}"
 MAX_TOKENS="${MLXSERVE_MAX_TOKENS:-1024}"
 KV_QUANT="${MLXSERVE_KV_QUANT:-4}"
+PREFILL_CHUNK="${MLXSERVE_PREFILL_CHUNK:-1024}"
 
 # Compose the argv passed to `mlx-serve --serve`. We always include
 # --max-resident-mem so the built-in resident-budget sizes for the primary
 # model on this 24 GB machine (its 80%-of-wired default caps at ~14 GB, which
 # is smaller than the primary model's ~17.6 GB working set). --ctx-size,
-# --max-tokens and --kv-quant are baked in at the Wave A verified working
-# values for the primary-model workflow. --skip-mem-preflight defaults on for
-# the same workflow because the built-in load gate ignores reclaimable
-# inactive pages (memo3.md: 17.2 GB weights on 24 GB unified); it does NOT
-# bypass the per-request GPU-memory gate, which practically caps accepted
-# prompts at ~3.6K tokens under the 8K --ctx-size configuration.
+# --max-tokens, --kv-quant and --prefill-chunk are baked in at the Wave B
+# verified working values for the primary-model workflow. --skip-mem-preflight
+# defaults on for the same workflow because the built-in load gate ignores
+# reclaimable inactive pages (memo3.md: 17.2 GB weights on 24 GB unified); it
+# does NOT bypass the per-request GPU-memory gate. That gate is instead
+# neutralised by --prefill-chunk 1024, which caps per-request GPU memory to
+# ~one chunk of activations and lifts the accepted-prompt ceiling from ~4K
+# (default 8192 chunk) to ~13.5K under --ctx-size 16384 on this machine.
 SERVE_ARGS=(--serve --host "$HOST" --port "$PORT" --model-dir "$MODEL_DIR")
 if [ "$MAX_RESIDENT_MEM" != "auto" ]; then
     SERVE_ARGS+=(--max-resident-mem "$MAX_RESIDENT_MEM")
@@ -71,7 +83,7 @@ fi
 if [ "$SKIP_MEM_PREFLIGHT" = "1" ]; then
     SERVE_ARGS+=(--skip-mem-preflight)
 fi
-SERVE_ARGS+=(--ctx-size "$CTX_SIZE" --max-tokens "$MAX_TOKENS" --kv-quant "$KV_QUANT")
+SERVE_ARGS+=(--ctx-size "$CTX_SIZE" --max-tokens "$MAX_TOKENS" --kv-quant "$KV_QUANT" --prefill-chunk "$PREFILL_CHUNK")
 # shellcheck disable=SC2206
 SERVE_ARGS+=($EXTRA_ARGS)
 
@@ -114,7 +126,7 @@ cmd_start() {
         log "Already running (pid $(cat "$PID_FILE")) on $HOST:$PORT"
         return 0
     fi
-    log "Starting mlx-serve on $HOST:$PORT (model-dir=$MODEL_DIR, max-resident-mem=$MAX_RESIDENT_MEM, skip-mem-preflight=$SKIP_MEM_PREFLIGHT, ctx-size=$CTX_SIZE, max-tokens=$MAX_TOKENS, kv-quant=$KV_QUANT)"
+    log "Starting mlx-serve on $HOST:$PORT (model-dir=$MODEL_DIR, max-resident-mem=$MAX_RESIDENT_MEM, skip-mem-preflight=$SKIP_MEM_PREFLIGHT, ctx-size=$CTX_SIZE, max-tokens=$MAX_TOKENS, kv-quant=$KV_QUANT, prefill-chunk=$PREFILL_CHUNK)"
     nohup "$MLX_BIN" "${SERVE_ARGS[@]}" \
         >>"$LOG_FILE" 2>&1 &
     echo "$!" >"$PID_FILE"
