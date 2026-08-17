@@ -32,9 +32,11 @@ Taps `ddalcu/mlx-serve`, trusts the tap, and installs the `mlx-serve`formula. Th
 # 1. Download the primary model (~17 GB, one-time).
 scripts/mlxserve.sh pull-primary
 
-# 2. Start the server (loopback :11234) with the memory knobs required for
-#    the 24 GB envelope, and load the primary model into memory.
-MLXSERVE_SKIP_MEM_PREFLIGHT=1 scripts/mlxserve.sh start
+# 2. Start the server (loopback :11234) with the verified defaults baked in
+#    for the 24 GB envelope (--max-resident-mem 20GB, --skip-mem-preflight,
+#    --ctx-size 8192, --max-tokens 1024, --kv-quant 4) and load the primary
+#    model into memory. No ad hoc env vars required.
+scripts/mlxserve.sh start
 scripts/mlxserve.sh load-primary
 
 # 3. Verify with the supported OpenAI-compatible client workflow.
@@ -58,7 +60,7 @@ scripts/mlxserve.sh stop
 | scripts/mlxserve.sh load-primary | POST /v1/load-model for the primary. |
 | scripts/mlxserve.sh smoke | One /v1/chat/completions round-trip. |
 | scripts/mlxserve.sh client-smoke [--stream] | Full OpenAI-contract client smoke. |
-| scripts/mlxserve.sh restart | stop | Lifecycle. |
+| scripts/mlxserve.sh restart | stop |
 
 Key environment overrides (all optional):
 
@@ -66,7 +68,11 @@ Key environment overrides (all optional):
 - `MLXSERVE_MODEL_DIR` — model download directory (default: `~/.mlx-serve/models`).
 - `MLXSERVE_PRIMARY_MODEL` — canonical primary model id (see fallback below).
 - `MLXSERVE_MAX_RESIDENT_MEM` — resident-memory cap (default: `20GB`).
-- `MLXSERVE_SKIP_MEM_PREFLIGHT` — set to `1` to bypass the per-load free-RAMgate. Required for the primary model on this 24 GB machine (see below).
+- `MLXSERVE_SKIP_MEM_PREFLIGHT` — `1` (default) passes `--skip-mem-preflight` to bypass the per-load free-RAM gate that the primary model trips on this 24 GB machine. Set to `0` to re-enable the built-in load gate.
+- `MLXSERVE_CTX_SIZE` — `--ctx-size` (default: `8192`). The enforced KV/prompt cap. See the honesty note below on the practical accepted-prompt ceiling.
+- `MLXSERVE_MAX_TOKENS` — `--max-tokens` (default: `1024`). Default per-request output cap.
+- `MLXSERVE_KV_QUANT` — `--kv-quant` (default: `4`). KV cache quantisation in bits; 4-bit keeps the 8K KV budget on-device.
+- `MLXSERVE_EXTRA_ARGS` — free-form extra flags appended to `mlx-serve --serve` (applied after the baked-in flags above).
 
 ## Supported local client workflow
 
@@ -92,10 +98,13 @@ The primary model is at the upper edge of what runs comfortably on 24 GB.Observe
 - `bytes_resident` for the loaded model: **17.18 GB** (matches the ~17.2 GBweight budget in `memo3.md`).
 - Load time: ~7–12 s cold.
 - Decode: ~90–94 tok/s on the primary model.
-- **Effective per-request **`context_length`** is dynamic**: MLXServe auto-shrinksthe KV budget to keep it inside `MLXSERVE_MAX_RESIDENT_MEM`. Long promptsmay be truncated silently; raise the cap or enable KV quantisation via`MLXSERVE_EXTRA_ARGS` if longer prompts are required, and re-verifyheadroom.
+- **Context configuration (wrapper defaults):** `--ctx-size 8192`, `--max-tokens 1024`, `--kv-quant 4` are baked into `scripts/mlxserve.sh` at the Wave A verified working values. Override via `MLXSERVE_CTX_SIZE`, `MLXSERVE_MAX_TOKENS`, `MLXSERVE_KV_QUANT`.
+- **Practical accepted-prompt ceiling: ~3.6K tokens.** On this 24 GB machine, the binding constraint is a *per-request* GPU-memory pre-flight in `mlx-serve`, not `--ctx-size`. Under the 8K configuration, prompts around **3614 tokens are accepted and around 3718 tokens are rejected** with HTTP 400 (`requires ~XMB GPU memory but only ~YMB available`). Raising `--ctx-size` alone does not raise this ceiling.
+- **`--skip-mem-preflight` does NOT bypass the per-request GPU-memory gate.** It only bypasses the one-shot free-RAM check at model *load* time. The per-request gate is enforced by the runtime and is what caps effective prompts at ~3.6K tokens today.
+- **The startup line `Model context length: 4096 tokens` is cosmetic.** It is an internal display value in the `mlx-serve 26.8.7` binary that appears on every startup regardless of `--ctx-size`. It does not gate requests; the model's `config.json` declares `max_position_embeddings=262144`, and the enforced cap is `--ctx-size` (currently 8192).
 - **The two memory knobs are load-blocking by default**:
   - MLXServe's built-in ~14 GB resident cap refuses the ~17.6 GB primarymodel → `MLXSERVE_MAX_RESIDENT_MEM=20GB` is the wrapper default.
-  - MLXServe's per-load free-RAM pre-flight uses "currently free" pages andignores reclaimable inactive/file-cache pages, so it refuses loads thatin fact fit → set `MLXSERVE_SKIP_MEM_PREFLIGHT=1` for the primary model.
+  - MLXServe's per-load free-RAM pre-flight uses "currently free" pages andignores reclaimable inactive/file-cache pages, so it refuses loads thatin fact fit → `MLXSERVE_SKIP_MEM_PREFLIGHT=1` is the wrapper default.
 - **Concurrent memory-hungry apps (browser, Docker, large IDEs) can OOM theload** at this envelope. Close them before `load-primary`, or use thefallback tier below.
 
 ## Fallback path (spec acceptance criterion 7)
@@ -119,7 +128,7 @@ scripts/mlxserve.sh client-smoke
 Notes:
 
 - Use `scripts/mlxserve.sh models` after the pull to confirm the download.
-- With a ~14B 4-bit model (roughly 8–10 GB of weights) you can typicallydrop `MLXSERVE_SKIP_MEM_PREFLIGHT` and lower `MLXSERVE_MAX_RESIDENT_MEM`(e.g. `12GB`) to leave more headroom for desktop apps. Re-verify with`scripts/mlxserve.sh client-smoke` after tuning.
+- With a ~14B 4-bit model (roughly 8–10 GB of weights) you can typicallyset `MLXSERVE_SKIP_MEM_PREFLIGHT=0` and lower `MLXSERVE_MAX_RESIDENT_MEM`(e.g. `12GB`) to leave more headroom for desktop apps. Re-verify with`scripts/mlxserve.sh client-smoke` after tuning.
 - The fallback is a **model swap only**; MLXServe, the wrapper, and theclient-smoke workflow are unchanged.
 - If neither model is workable during normal desktop use, follow the spec'srollback plan: `scripts/mlxserve.sh stop` and treat the local stack as anisolated experiment rather than a daily-workflow dependency.
 
