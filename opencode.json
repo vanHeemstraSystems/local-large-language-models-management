@@ -12,6 +12,18 @@
     }
   },
 
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "reserved": 5000,
+    "preserve_recent_tokens": 4000
+  },
+
+  "tool_output": {
+    "max_lines": 200,
+    "max_bytes": 16384
+  },
+
   "provider": {
     "mlxserve": {
       "npm": "@ai-sdk/openai-compatible",

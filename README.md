@@ -33,7 +33,7 @@ Taps `ddalcu/mlx-serve`, trusts the tap, and installs the `mlx-serve`formula. Th
 scripts/mlxserve.sh pull-primary
 
 # 2. Start the server (loopback :11234) with the verified defaults baked in
-#    for the 24 GB envelope (--max-resident-mem 20GB, --skip-mem-preflight,
+#    for the 24 GB envelope (--max-resident-mem 18GB, --skip-mem-preflight,
 #    --ctx-size 16384, --max-tokens 1536, --kv-quant 4, --prefill-chunk 1024)
 #    and load the primary model into memory. No ad hoc env vars required.
 scripts/mlxserve.sh start
@@ -67,7 +67,7 @@ Key environment overrides (all optional):
 - `MLXSERVE_HOST` / `MLXSERVE_PORT` — bind address (defaults: `127.0.0.1:11234`).
 - `MLXSERVE_MODEL_DIR` — model download directory (default: `~/.mlx-serve/models`).
 - `MLXSERVE_PRIMARY_MODEL` — canonical primary model id (see fallback below).
-- `MLXSERVE_MAX_RESIDENT_MEM` — resident-memory cap (default: `20GB`).
+- `MLXSERVE_MAX_RESIDENT_MEM` — resident-memory cap (default: `18GB`, safety-revised from `20GB` after the 2026-08-17 kernel panic; see the safety note below).
 - `MLXSERVE_SKIP_MEM_PREFLIGHT` — `1` (default) passes `--skip-mem-preflight` to bypass the per-load free-RAM gate that the primary model trips on this 24 GB machine. Set to `0` to re-enable the built-in load gate.
 - `MLXSERVE_CTX_SIZE` — `--ctx-size` (default: `16384`). The enforced KV/prompt cap. See the honesty note below on the practical accepted-prompt ceiling.
 - `MLXSERVE_MAX_TOKENS` — `--max-tokens` (default: `1536`). Default per-request output cap.
@@ -98,7 +98,7 @@ Any OpenAI-SDK-shaped client (Claude Code with `ANTHROPIC_BASE_URL` remapped,Con
   | `--max-tokens` | 1536 |
   | `--kv-quant` | 4 |
   | `--prefill-chunk` | 1024 |
-  | `--max-resident-mem` | 20GB |
+  | `--max-resident-mem` | 18GB (safety-revised from 20GB) |
   | `--skip-mem-preflight` | on (per-load free-RAM gate bypassed) |
   | OpenCode provider limits | context 16384 / output 1536 |
 
@@ -124,9 +124,75 @@ The primary model is at the upper edge of what runs comfortably on 24 GB.Observe
 - **`--skip-mem-preflight` does NOT bypass the per-request GPU-memory gate.** It only bypasses the one-shot free-RAM check at model *load* time. The per-request gate is enforced by the runtime and is what caps effective prompts even under `--skip-mem-preflight`.
 - **The startup line `Model context length: 4096 tokens` is cosmetic.** It is an internal display value in the `mlx-serve 26.8.7` binary that appears on every startup regardless of `--ctx-size`. It does not gate requests; the model's `config.json` declares `max_position_embeddings=262144`, and the enforced cap is `--ctx-size` (currently 16384).
 - **The two memory knobs are load-blocking by default**:
-  - MLXServe's built-in ~14 GB resident cap refuses the ~17.6 GB primarymodel → `MLXSERVE_MAX_RESIDENT_MEM=20GB` is the wrapper default.
+  - MLXServe's built-in ~14 GB resident cap refuses the ~17.6 GB primarymodel → `MLXSERVE_MAX_RESIDENT_MEM=18GB` is the wrapper default (safety-revised from 20GB; see the safety note below).
   - MLXServe's per-load free-RAM pre-flight uses "currently free" pages andignores reclaimable inactive/file-cache pages, so it refuses loads thatin fact fit → `MLXSERVE_SKIP_MEM_PREFLIGHT=1` is the wrapper default.
 - **Concurrent memory-hungry apps (browser, Docker, large IDEs) can OOM theload** at this envelope. Close them before `load-primary`, or use thefallback tier below.
+
+## Safety note: 18GB resident cap (2026-08-17 revision)
+
+On 2026-08-17 the Mac suffered a full macOS kernel panic during a modest MLXServe workload (8,260-token prompt, streaming, speculative decoding active). The panic report was `"completeMemory() prepare count underflow" @IOGPUMemory.cpp:550` in Apple's `com.apple.iokit.IOGPUFamily` driver, with `mlx-serve` listed as the panicked task. mlx-serve was the panicked task and generated the associated GPU workload/state, but the panic itself occurred inside Apple's IOGPUFamily driver. The evidence does NOT yet establish whether the underlying defect is in MLXServe, MLX, Metal/IOGPUFamily, or an interaction among them — do not describe MLXServe as definitively containing the root-cause bug.
+
+Operating principle after this event: **machine stability outranks maximizing resident model memory or context capacity.** The wrapper's `MLXSERVE_MAX_RESIDENT_MEM` default was therefore reduced from `20GB` to `18GB`. All other frozen-baseline flags are unchanged (`--ctx-size 16384`, `--max-tokens 1536`, `--kv-quant 4`, `--prefill-chunk 1024`, `--skip-mem-preflight`). Note that mlx-serve derives its `[wired] mode=max limit=18186 MB` ceiling independently of this flag, so the log line looks identical at 18GB and 20GB; the registry line (`max_resident_mem=18.0 GB`) is the visible change. Rationale, layered failure modes, and the one-variable-at-a-time / stop-rule discipline governing further tuning are recorded in `STRATEGY.md`.
+
+## Context budget policy (OpenCode + Augment Context Engine)
+
+Operator-facing policy for running OpenCode with the Augment Context Engine MCP against the local MLXServe endpoint on this 24 GB Mac mini. Numbers below are measured against the committed baseline (`opencode.json` at the repo root; MLXServe defaults from `scripts/mlxserve.sh`). This section sits on top of the stability principle and layered failure model in `STRATEGY.md`.
+
+### The budget (verified numbers)
+
+| Item | Value | Source |
+| --- | --- | --- |
+| Hard context cap | 16,384 tokens | `--ctx-size` (MLXServe); HTTP 400 above this |
+| Initial envelope, MCP enabled | ~8,262 tokens | measured after adding `augment-context-engine` MCP |
+| Per retrieval call | ~2,400 tokens / ~10 KB | bounded by committed `tool_output.max_lines: 200` (measured 2,339 / 2,442 tokens on 9.3–9.8 KB payloads) |
+| Compaction reserve | 5,000 tokens | committed `compaction.reserved` |
+| Spare after one retrieval | ~722 tokens | `16,384 − 8,262 − 2,400 − 5,000` |
+| Peak measured successful prompt | 15,531 tokens | end-to-end Safety Phase run, natural stop |
+
+Rule of thumb: roughly **two retrievals plus one continuation** fit before auto-compaction must fire. The budget is real but genuinely narrow.
+
+### What is enforced automatically vs. operator discipline
+
+Enforced by committed `opencode.json`:
+
+- Auto-compaction (`compaction.auto: true`, `prune: true`, `reserved: 5000`, `preserve_recent_tokens: 4000`) — fires above the reserve, prunes tool messages, reissues a shrunk prompt. Verified: a 16,005-token turn was pruned to an 11,889-token reissue (−26%).
+- Retrieval / tool payload caps (`tool_output.max_lines: 200`, `tool_output.max_bytes: 16384`) — the `max_lines` cap is the binding one for `codebase-retrieval` payloads.
+
+Operator discipline (the config cannot enforce these):
+
+- Ask targeted retrieval questions — small, specific queries beat broad "explain everything" prompts.
+- Avoid broad reads of large files. `tool_output.max_bytes` did **not** cap the read-tool path in one measured run (14,907 bytes returned uncapped). Prefer retrieval over full-file reads when the file is larger than ~8 KB.
+- Restart the OpenCode session when the warm cache degrades (see the failure-mode ladder below).
+
+### Do not
+
+Each item is backed by a measured failure.
+
+- **Do not truncate `tool_output` below the committed defaults.** A `max_lines: 100 / max_bytes: 8192` variant produced ~46% less payload but induced a hallucinated-webfetch storm (20 calls to an invented GitHub repo) and a ctx-size overflow at request 3 (18,552 tokens). Under-truncation deprives the model of grounding and is counterproductive.
+- **Do not assume a fixed token ceiling equals reliability.** A post-compaction 11,889-token request was rejected by the per-request GPU gate (780 MB needed vs. 514 MB available). Runtime free GPU memory — not the token count alone — governs acceptance.
+- **Do not treat a few clean short runs as proof of sustained-workload safety.** All measurements above are n=1 per condition; see "Known gaps".
+
+### Failure-mode ladder and operator response
+
+| Layer | What the operator sees | Response |
+| --- | --- | --- |
+| 1. ctx-size overflow | HTTP 400 `"Prompt exceeds maximum context length: N requested, 16384 available"` | Let auto-compaction fire; if compaction has already run this turn, restart the OpenCode session. |
+| 2. Per-request GPU gate | HTTP 400 `"requires ~XMB GPU memory but only ~YMB available"` | Restart MLXServe (`scripts/mlxserve.sh restart && scripts/mlxserve.sh load-primary`) — warm-cache fragmentation is not fixable client-side. |
+| 3. Driver-level instability | Server hang, GPU stall, or (once observed) a full macOS kernel panic | Stop the server, honor the `STRATEGY.md` stop rules, capture logs, and reassess before resuming. Root-cause attribution across MLXServe / MLX / Metal / IOGPUFamily is undetermined. |
+
+### Safety controls for sustained agent workloads
+
+- `MLXSERVE_EXTRA_ARGS="--no-pld"` disables PLD/speculative decoding as a precaution for long agent loops. Committed default is unchanged (verdict undetermined; short controlled cycles neither proved nor refuted a causal PLD contribution to the driver-level failure). Trades throughput on echo-heavy loops for one fewer variable in the GPU state.
+- `--max-resident-mem 18GB` is a policy-level tightening from `20GB`. With a single ~16 GB model loaded it is **non-binding today** (the wired limit `18186 MB` is derived independently), but it caps future multi-model or larger-model configurations.
+- Restart MLXServe between long agent sessions to clear warm cache state.
+- Honor the `STRATEGY.md` stop rules on any GPU stall, severe memory pressure, or abnormal log output — do not push through.
+
+### Known gaps (honesty section)
+
+- **Edit-producing loop shape undemonstrated** at this budget. Phase 3 retrieval measurements used a read-then-summarize scenario ("Do NOT modify any files"); the end-to-end tool-call → tool-result → edit flow at ~15K tokens has not been reproduced under the current committed defaults.
+- **n=1 per condition.** Single runs cannot cleanly separate config effects from stochastic behavior.
+- **Long-horizon safety unproven.** The panic-workload shape has deliberately not been reproduced; clean short cycles are not proof of sustained safety.
+- **Warm-cache degradation quantified only anecdotally** — the Stage 2b rejection at 15,499 tokens and the post-compaction rejection at 11,889 tokens are the only concrete data points.
 
 ## Fallback path (spec acceptance criterion 7)
 
