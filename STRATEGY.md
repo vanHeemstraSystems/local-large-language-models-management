@@ -64,8 +64,19 @@ softest to hardest:
    *Mitigations we can apply:* resident-memory headroom (18GB cap);
    avoiding the specific workload shape that preceded the observed
    panic (streaming + speculative decoding + accumulating GPU state) is
-   a candidate but *not yet a confirmed cause* — a separate task will
-   assess PLD/speculative decoding contribution in isolation.
+   a candidate but *not a confirmed cause*. PLD/speculative decoding is
+   toggleable at launch (`--no-pld`, or `MLXSERVE_EXTRA_ARGS=--no-pld`
+   with the current script) and its state is visible in the startup
+   `[args] ... pld=on|off` line and per-request `pld=enabled|disabled`
+   log lines. Short controlled cycles at the 18GB baseline (PLD-on vs
+   PLD-off, restart between runs) were clean in both series and
+   therefore neither establish nor refute a causal PLD contribution
+   to the driver-level failure mode; attribution stays undetermined
+   (see root-cause attribution discipline). Disabling PLD is an
+   available precaution for sustained agent workloads at the cost
+   of throughput on echo-heavy workloads (code editing, RAG,
+   agentic loops), where PLD is designed to help; the default has
+   not been changed on that basis alone.
 
 Compaction/truncation and retrieval budgets address layer 1 primarily
 and layer 2 secondarily; resident-memory headroom and session-restart
