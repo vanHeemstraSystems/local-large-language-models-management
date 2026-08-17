@@ -3,7 +3,8 @@
 Operating strategy for the local-LLM stack on this 24 GB Mac mini M4 Pro.
 This document is the short, operator-focused summary of *how* we run and
 tune the stack safely. Detailed evidence lives in the workspace spec and
-task notes.
+task notes; the concrete OpenCode + Augment Context Engine context-budget
+numbers live in the "Context budget policy" section of `README.md`.
 
 ## Core principle
 
