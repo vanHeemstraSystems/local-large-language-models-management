@@ -4,6 +4,14 @@
 
   "enabled_providers": ["mlxserve"],
 
+  "mcp": {
+    "augment-context-engine": {
+      "type": "local",
+      "command": ["auggie", "--mcp", "--mcp-auto-workspace"],
+      "enabled": true
+    }
+  },
+
   "provider": {
     "mlxserve": {
       "npm": "@ai-sdk/openai-compatible",
