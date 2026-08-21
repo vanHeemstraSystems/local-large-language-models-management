@@ -1,3 +1,6 @@
 # MLXServe local state (pid, logs)
 .mlxserve/
 .DS_Store
+
+# Scratch experiments (Warp Agent Mode, ad-hoc client trials, etc.)
+experiments/
