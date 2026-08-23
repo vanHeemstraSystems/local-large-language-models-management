@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "mlxlm//Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8",
+  "model": "mlxlm//Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit",
   "enabled_providers": [
     "mlxlm"
   ],
