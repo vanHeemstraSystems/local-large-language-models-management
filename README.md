@@ -4,6 +4,8 @@ A minimal, reproducible local-LLM stack for a **Mac mini M4 Pro with 24 GBunifie
 
 Verified on Apple M4 Pro · 14 cores · 24 GiB · macOS 26.5.2 (arm64).
 
+> **New operator?** Start with [QUICKSTART.md](QUICKSTART.md) — step-by-step setup for the current `mlx-lm.server` + OpenCode + Augment Intent (BYOA) workflow, including the A.1 venv patch, billing/credits guidance, and known errors. This README documents the historical `mlx-serve` stack and its safety envelope.
+
 ## What is in this repo
 
 - `scripts/mlxserve.sh` — single entry point for install / lifecycle /primary-model / client-smoke operations. Run `scripts/mlxserve.sh --help`for the full subcommand list.
