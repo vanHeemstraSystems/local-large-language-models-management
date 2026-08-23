@@ -1,3 +1,15 @@
 # MLXServe local state (pid, logs)
 .mlxserve/
 .DS_Store
+
+# mlx-lm local state (pid, logs, probe artifacts, persistent venv is under ~/.mlxlm/)
+.mlxlm/
+
+# opencode.json backups written before destructive edits
+.opencode-backups/
+
+# macOS Automator scratch (Warp/session integrations)
+macos/
+
+# Scratch experiments (Warp Agent Mode, ad-hoc client trials, etc.)
+experiments/
