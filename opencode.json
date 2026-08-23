@@ -25,6 +25,14 @@
     "max_lines": 200,
     "max_bytes": 16384
   },
+  "agent": {
+    "title": {
+      "disable": true
+    },
+    "summary": {
+      "disable": true
+    }
+  },
   "provider": {
     "mlxlm": {
       "npm": "@ai-sdk/openai-compatible",
