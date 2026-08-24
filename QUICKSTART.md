@@ -18,10 +18,10 @@ Step-by-step operator guide for the validated `mlx-lm.server` + OpenCode + Augme
 Intent by Augment is BYOA (Bring Your Own Agent). This stack routes the agent through **OpenCode** at a **local** `mlx-lm.server`, so model calls do not touch Augment infrastructure. Per the [Intent walkthrough](https://www.augmentcode.com/guides/intent-walkthrough-prompt-to-merge) and [Intent pricing guide](https://www.augmentcode.com/guides/intent-pricing):
 
 | Component | Costs Augment credits? |
-|---|---|
+| --- | --- |
 | Auggie native agents (Coordinator / Implementor / Verifier / specialists) | Yes — same rate as the Auggie CLI |
-| Augment Context Engine (`auggie --mcp`, `codebase-retrieval`) | Yes — drawn from your credit pool per retrieval |
-| BYOA provider (Claude Code / Codex / **OpenCode**) | No — billed to that provider directly (here: local, $0) |
+| Augment Context Engine (auggie --mcp, codebase-retrieval) | Yes — drawn from your credit pool per retrieval |
+| BYOA provider (Claude Code / Codex / OpenCode) | No — billed to that provider directly (here: local, $0) |
 | Intent orchestration (spec editing, worktrees, PR flow) | No separate charge |
 
 ### Selecting the BYOA path in Intent
@@ -35,9 +35,9 @@ Chat sessions started against an Auggie specialist (Coordinator, Implementor, PR
 ### Two operating modes
 
 | Mode | Configuration | Cost | Trade-off |
-|---|---|---|---|
-| **BYOA + Context Engine** (default in this repo) | Keep `mcp.augment-context-engine` in `opencode.json` | Only Context Engine retrieval credits; model tokens are free | Grounded semantic search stays available |
-| **Fully local, zero-cost** | Remove or disable the `mcp.augment-context-engine` block in `opencode.json` | $0 | Loses Augment retrieval; OpenCode falls back to built-in file/grep/terminal tools |
+| --- | --- | --- | --- |
+| BYOA + Context Engine (default in this repo) | Keep mcp.augment-context-engine in opencode.json | Only Context Engine retrieval credits; model tokens are free | Grounded semantic search stays available |
+| Fully local, zero-cost | Remove or disable the mcp.augment-context-engine block in opencode.json | $0 | Loses Augment retrieval; OpenCode falls back to built-in file/grep/terminal tools |
 
 ### Verifying no credits are consumed
 
@@ -153,6 +153,77 @@ Expected: P1, P2, P4 exit 0 with `finish=stop`; P3 exits 0 with `finish=length` 
 ```sh
 .mlxlm/serve.sh stop
 ```
+
+## Coding with Warp
+
+Day-to-day coding from Warp uses two terminal tabs and one focused OpenCode session at a time. Treat Warp as a plain terminal with tabs — no other Warp features are assumed.
+
+### Two-tab Warp layout
+
+| Tab | Working directory | Purpose | Commands |
+| --- | --- | --- | --- |
+| 1 | anywhere | `mlx-lm.server` control | `.mlxlm/serve.sh start` / `status` / `stop`; `tail -f .mlxlm/mlxlm-serve.log` |
+| 2 | repository root | OpenCode agent loop | `opencode` |
+
+Keep Tab 1 visible while working in Tab 2 so server errors (`BatchRotatingKVCache`, OOM, IOGPU) surface immediately in the log.
+
+### Starting a coding session
+
+Preflight checklist — run in order, do not skip:
+
+1. Server up: `.mlxlm/serve.sh status` shows a live PID and `/v1/models` returns JSON.
+2. A.1 patch present: `grep -n 'call_{uuid' ~/.mlxlm/venv/lib/python3.9/site-packages/mlx_lm/server.py` returns exactly one match.
+3. `cd` into the repository you want to work on and run `opencode` from that directory. OpenCode reads that repo's `opencode.json` and routes model calls to `http://127.0.0.1:8080/v1`.
+4. Working in a different repository? Copy this repo's `opencode.json` there first as a template (provider URL, default model, MCP wiring, context/output caps, `tool_output` caps).
+
+### How to prompt for coding work
+
+The context budget is **16,384 tokens with a ~1,536-token output cap** (per-model `limit` in `opencode.json`). Ask for one focused change per exchange — do not bundle unrelated asks.
+
+Grounded exploration via the `augment-context-engine` MCP tool:
+
+> Use codebase-retrieval to find where `<symbol or behavior>` is defined in this repo. Quote the file and the exact lines. Do not summarize other files.
+
+A small scoped edit:
+
+> Modify function `<X>` in `<path/to/file>` to `<Z>`. Show the diff only. Do not touch other files.
+
+Running tests or commands via OpenCode's built-in terminal tool:
+
+> Run `<tests|lint|build command>` from the repo root and report only the failing lines.
+
+Keep retrieval payloads focused and let compaction do its job (`compaction.auto=true` in `opencode.json`).
+
+### Session hygiene (green / amber / red)
+
+Follows STRATEGY.md's session lifecycle. React early — do not push through amber.
+
+| State | Signals | Action |
+| --- | --- | --- |
+| Green | Requests complete normally; no GPU-memory warnings; no `BatchRotatingKVCache` traceback in the log | Continue |
+| Amber | Repeated retrieval dominates history; context approaches 16K; compaction fires repeatedly; GPU gate starts rejecting reasonable requests | Preserve conclusions to notes, end the OpenCode session, restart it from a clean context; restart the server between heavy sessions |
+| Red | GPU stall, server hang, severe memory pressure, IOGPU/Metal errors, abnormal process termination, kernel panic | Stop immediately. Capture the log. Do not reproduce the workload. |
+
+Restart the OpenCode session as soon as you see `Prompt exceeds maximum context length: N requested, 16384 available` — that is the hard context cap, not a transient hiccup. Stop-rule triggers mean abort, not retry.
+
+### Reviewing and committing
+
+The local model proposes edits; the operator owns git. Review and commit from Warp:
+
+```sh
+git status
+git diff <path>          # review each change
+git add -p <path>        # stage hunks you accept
+git commit -m "<message>"
+```
+
+Do not delegate `git commit` or `git push` to the model. Reject any edit you would not commit yourself.
+
+### What NOT to do
+
+- **Do not paste large files into the prompt.** Tool output is already capped at 200 lines / 16 KB (`tool_output` in `opencode.json`); manual pastes bypass that cap and blow the context.
+- **Do not run parallel OpenCode sessions against a single `mlx-lm.server`.** Concurrent requests with different prompt lengths trigger the W4 `BatchRotatingKVCache.merge` crash. The `agent.title.disable` / `agent.summary.disable` settings in `opencode.json` serialize one session's own traffic; they do not protect against a second client.
+- **Do not use `gpt-oss-20b` for tool-calling work.** `mlx_lm.server` does not parse its Harmony `commentary` channel into structured `tool_calls[]`, so MCP tool loops never fire. Keep the default `Qwen3-8B-4bit`.
 
 ## Known errors and their resolution
 
