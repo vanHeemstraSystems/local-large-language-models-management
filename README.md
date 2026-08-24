@@ -36,7 +36,7 @@ If any documentation disagrees with `opencode.json` or `.mlxlm/PATCHES.md`, the 
 - `.mlxlm/probes/` — four-probe baseline suite (transport / modeling / resource / long-context) and reproducible artifacts under `baseline_postmerge_*`.
 - `opencode.json` — OpenCode workspace configuration that wires the agent loop to the local endpoint and the Augment Context Engine MCP.
 - `QUICKSTART.md`, `STRATEGY.md` — see above.
-- `memo1.md`, `memo2.md`, `memo3.md` — background rationale (hardware, model choice, runtime selection). Not required to operate the stack.
+- `archive/memo1.md`, `archive/memo2.md`, `archive/memo3.md` — background rationale (hardware, model choice, runtime selection). Not required to operate the stack.
 - `scripts/mlxserve.sh`, `scripts/client_smoke.py`, `.mlxserve/` — **legacy** artifacts from the pre-migration `mlx-serve` stack. Retained for historical reference; see the *Legacy `mlx-serve` stack* appendix below.
 
 ## Prerequisites
@@ -126,7 +126,7 @@ Both models must be downloaded once; see [QUICKSTART.md § 2](QUICKSTART.md#2-do
 - Alternate model: <https://huggingface.co/mlx-community/gpt-oss-20b-MXFP4-Q8>
 - OpenCode: <https://opencode.ai>
 - Intent by Augment: <https://www.augmentcode.com/guides/intent-walkthrough-prompt-to-merge>
-- Background rationale: `memo1.md`, `memo2.md`, `memo3.md`
+- Background rationale: `archive/memo1.md`, `archive/memo2.md`, `archive/memo3.md`
 
 ---
 
@@ -234,7 +234,7 @@ Known gaps at the time of the legacy measurements: edit-producing loop shape und
 
 ### Legacy fallback path
 
-If Qwen3-Coder-30B was too memory-constrained on the legacy stack, `memo3.md` marked Qwen 14B 4-bit as the comfortable fallback:
+If Qwen3-Coder-30B was too memory-constrained on the legacy stack, `archive/memo3.md` marked Qwen 14B 4-bit as the comfortable fallback:
 
 ```sh
 export MLXSERVE_PRIMARY_MODEL=mlx-community/<qwen-14b-4bit-repo-id>
