@@ -1,0 +1,11 @@
+=== server startup ===
+PID: 28626
+
+=== /v1/models ===
+{"object": "list", "data": [{"id": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8", "object": "model", "created": 1787686167}]}
+=== serve.sh status ===
+  PID    RSS COMMAND
+28626 7691536 /opt/homebrew/Cellar/python@3.12/3.12.13/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -m mlx_lm server --host 127.0.0.1 --port 8080 --model /Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8
+
+--- /v1/models ---
+{"object": "list", "data": [{"id": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8", "object": "model", "created": 1787686167}]}

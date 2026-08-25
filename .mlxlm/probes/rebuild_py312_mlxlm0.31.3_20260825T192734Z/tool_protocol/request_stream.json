@@ -1,0 +1,30 @@
+{
+  "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a tool-using assistant. Whenever the user asks about the current working directory, you MUST call the get_current_directory tool exactly once and wait for the result. Do not answer from memory. /no_think"
+    },
+    {
+      "role": "user",
+      "content": "What is the current working directory of the process running you? Call the get_current_directory tool now to find out. /no_think"
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_current_directory",
+        "description": "Return the current working directory of the running process.",
+        "parameters": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    }
+  ],
+  "tool_choice": "auto",
+  "temperature": 0.0,
+  "max_tokens": 512,
+  "stream": true
+}

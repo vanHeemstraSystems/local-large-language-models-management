@@ -1,0 +1,17 @@
+=== python3.12 binary ===
+PY312=/opt/homebrew/bin/python3.12
+Python 3.12.13
+
+=== new venv python symlinks ===
+lrwxr-xr-x@ 1 willemvanheemstra  staff  10 Aug 25 21:27 /Users/willemvanheemstra/.mlxlm/venv/bin/python -> python3.12
+lrwxr-xr-x@ 1 willemvanheemstra  staff  10 Aug 25 21:27 /Users/willemvanheemstra/.mlxlm/venv/bin/python3 -> python3.12
+lrwxr-xr-x@ 1 willemvanheemstra  staff  44 Aug 25 21:27 /Users/willemvanheemstra/.mlxlm/venv/bin/python3.12 -> /opt/homebrew/opt/python@3.12/bin/python3.12
+readlink python:  python3.12
+readlink python3: python3.12
+
+=== new venv python -V (executed) ===
+Python 3.12.13
+
+=== new venv sys.executable ===
+/Users/willemvanheemstra/.mlxlm/venv/bin/python
+3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]

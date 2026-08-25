@@ -1,0 +1,20 @@
+four-probe suite start=2026-08-25T21:29:56+02:00
+default model (from opencode.json): mlxlm//Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+probe=p1_transport exit=0 elapsed=33s
+  mem_free_mb: before=10393 after=6071
+  server_rss_mb: before=3665 after=3677
+  out_bytes=    1051 stderr_bytes=       0 servelog_bytes=     838
+probe=p2_modeling exit=0 elapsed=16s
+  mem_free_mb: before=6070 after=6017
+  server_rss_mb: before=3677 after=3679
+  out_bytes=    1077 stderr_bytes=       0 servelog_bytes=     475
+probe=p3_resource exit=0 elapsed=50s
+  mem_free_mb: before=6010 after=2982
+  server_rss_mb: before=3679 after=3682
+  out_bytes=     732 stderr_bytes=       0 servelog_bytes=     475
+probe=p4_longctx exit=0 elapsed=35s
+  mem_free_mb: before=2980 after=962
+  server_rss_mb: before=3682 after=3682
+  out_bytes=    1037 stderr_bytes=       0 servelog_bytes=     625
+
+four-probe suite end=2026-08-25T21:32:10+02:00

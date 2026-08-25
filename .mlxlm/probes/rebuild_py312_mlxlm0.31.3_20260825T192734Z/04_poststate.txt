@@ -1,0 +1,181 @@
+=== python -V ===
+Python 3.12.13
+
+=== python sys.executable / sys.version ===
+/Users/willemvanheemstra/.mlxlm/venv/bin/python
+3.12.13 (main, Mar  3 2026, 12:39:30) [Clang 17.0.0 (clang-1700.6.3.2)]
+
+=== pip show mlx-lm ===
+Name: mlx-lm
+Version: 0.31.3
+Summary: LLMs with MLX and the Hugging Face Hub
+Home-page: https://github.com/ml-explore/mlx-lm
+Author: MLX Contributors
+Author-email: mlx@group.apple.com
+License: MIT
+Location: /Users/willemvanheemstra/.mlxlm/venv/lib/python3.12/site-packages
+Requires: jinja2, mlx, numpy, protobuf, pyyaml, sentencepiece, transformers
+Required-by: 
+
+=== pip show mlx ===
+Name: mlx
+Version: 0.32.2
+Summary: A framework for machine learning on Apple silicon.
+Home-page: https://github.com/ml-explore/mlx
+Author: MLX Contributors
+Author-email: mlx@group.apple.com
+License: MIT
+Location: /Users/willemvanheemstra/.mlxlm/venv/lib/python3.12/site-packages
+Requires: mlx-metal
+Required-by: mlx-lm
+
+=== python -c mlx_lm.__version__ ===
+0.31.3
+
+=== python -c mlx version ===
+0.32.2
+dist mlx = 0.32.2
+dist mlx-lm = 0.31.3
+
+=== confirm ToolCallFormatter exists (import + inspect) ===
+has ToolCallFormatter: True
+class: <class 'mlx_lm.server.ToolCallFormatter'>
+defined in: /Users/willemvanheemstra/.mlxlm/venv/lib/python3.12/site-packages/mlx_lm/server.py
+--- ToolCallFormatter source ---
+class ToolCallFormatter:
+    def __init__(self, tool_parser, tools, streaming=False):
+        self._idx = 0
+        self._tool_parser = tool_parser
+        self._tools = tools
+        self._streaming = streaming
+
+    def _format(self, tc):
+        tc_id = tc.pop("id", None) or str(uuid.uuid4())
+        tc["arguments"] = json.dumps(tc["arguments"], ensure_ascii=False)
+        out = {
+            "function": tc,
+            "type": "function",
+            "id": tc_id,
+        }
+        if self._streaming:
+            out["index"] = self._idx
+            self._idx += 1
+        return out
+
+    def __call__(self, tool_calls):
+        if not tool_calls:
+            return []
+
+        result = []
+        for tool_text in tool_calls:
+            try:
+                parsed = self._tool_parser(tool_text, self._tools)
+            except (ValueError, json.JSONDecodeError) as e:
+                logging.warning(
+                    f"Failed to parse tool call ({type(e).__name__}: {e}) — "
+                    f"tool text was likely truncated mid-generation."
+                )
+                continue
+            if not isinstance(parsed, list):
+                parsed = [parsed]
+            result.extend(self._format(tc) for tc in parsed)
+        return result
+
+
+=== confirm tc_id fallback (id-when-missing) in ToolCallFormatter source ===
+server.py path: /Users/willemvanheemstra/.mlxlm/venv/lib/python3.12/site-packages/mlx_lm/server.py
+--- grep for uuid/call_ id-generation patterns in server.py ---
+10:import uuid
+62:        tc_id = tc.pop("id", None) or str(uuid.uuid4())
+67:            "id": tc_id,
+74:    def __call__(self, tool_calls):
+669:            ts = tokenizer.tool_call_start_tokens
+670:            te = tokenizer.tool_call_end_tokens
+674:            sequences[ts] = tokenizer.tool_call_start
+676:                sequences[te] = tokenizer.tool_call_end
+1590:        self.request_id = f"chatcmpl-{uuid.uuid4()}"
+1609:        self.request_id = f"cmpl-{uuid.uuid4()}"
+
+--- ripgrep-style context around id generation for tool calls ---
+10: import uuid
+54: class ToolCallFormatter:
+55:     def __init__(self, tool_parser, tools, streaming=False):
+61:     def _format(self, tc):
+62:         tc_id = tc.pop("id", None) or str(uuid.uuid4())
+67:             "id": tc_id,
+74:     def __call__(self, tool_calls):
+236: def _process_control_tokens(ctx, token_stream):
+253:     def __init__(self, budget=0.5, iterations=25, sync_frequency=10):
+263:     def __iter__(self):
+268:     def __next__(self):
+293:     def __init__(self, cli_args: argparse.Namespace):
+326:     def _load(self, model_path, adapter_path=None, draft_model_path=None):
+399: def _make_sampler(args, tokenizer):
+414: def _make_logits_processors(args):
+426: def _format_top_logprobs(logprobs, top_n, tokenizer) -> Tuple[Dict[str, Any]]:
+441:     def __init__(self, model_provider: ModelProvider, prompt_cache: LRUPromptCache):
+461:     def _log_cache_stats(self):
+472:     def _next_request(self, timeout=None):
+484:     def _share_object(self, obj):
+504:     def _share_request(self, request):
+516:     def _tokenize(self, tokenizer, request, args):
+626:     def _make_state_machine(
+669:             ts = tokenizer.tool_call_start_tokens
+670:             te = tokenizer.tool_call_end_tokens
+674:             sequences[ts] = tokenizer.tool_call_start
+676:                 sequences[te] = tokenizer.tool_call_end
+685:     def _is_batchable(self, args):
+688:     def _generate(self):
+922:     def _serve_single(self, request):
+1035:         def _inner():
+1060:     def __init__(
+1075:     def _set_cors_headers(self):
+1086:     def _set_completion_headers(self, status_code: int = 200):
+1091:     def _set_stream_headers(self, status_code: int = 200):
+1204:     def _validate(
+1590:         self.request_id = f"chatcmpl-{uuid.uuid4()}"
+1609:         self.request_id = f"cmpl-{uuid.uuid4()}"
+1702: def _run_http_server(
+
+=== confirm NO A.1-style patched line is needed (grep for A.1 marker or unpatched pattern) ===
+74:    def __call__(self, tool_calls):
+669:            ts = tokenizer.tool_call_start_tokens
+670:            te = tokenizer.tool_call_end_tokens
+674:            sequences[ts] = tokenizer.tool_call_start
+676:                sequences[te] = tokenizer.tool_call_end
+
+=== pip freeze (full) ===
+annotated-doc==0.0.5
+anyio==4.14.2
+certifi==2026.7.22
+click==8.4.2
+filelock==3.32.4
+fsspec==2026.7.0
+h11==0.16.0
+hf-xet==1.6.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface_hub==1.28.0
+idna==3.19
+Jinja2==3.1.6
+markdown-it-py==4.2.0
+MarkupSafe==3.0.3
+mdurl==0.1.2
+mlx==0.32.2
+mlx-lm==0.31.3
+mlx-metal==0.32.2
+numpy==2.5.2
+packaging==26.3
+protobuf==7.36.0
+Pygments==2.21.0
+PyYAML==6.0.3
+regex==2026.7.19
+rich==15.0.0
+safetensors==0.8.0
+sentencepiece==0.2.2
+shellingham==1.5.4
+tokenizers==0.22.2
+tqdm==4.70.0
+transformers==5.15.1
+typer==0.27.1
+typing_extensions==4.16.0

@@ -1,0 +1,55 @@
+/Users/willemvanheemstra/.mlxlm/venv/lib/python3.12/site-packages/mlx_lm/server.py:1723: UserWarning: mlx_lm.server is not recommended for production as it only implements basic security checks.
+  warnings.warn(
+2026-08-25 21:29:26,057 - INFO - Starting httpd at 127.0.0.1 on port 8080...
+127.0.0.1 - - [25/Aug/2026 21:29:27] "GET /v1/models HTTP/1.1" 200 -
+127.0.0.1 - - [25/Aug/2026 21:29:27] "GET /v1/models HTTP/1.1" 200 -
+127.0.0.1 - - [25/Aug/2026 21:29:33] "GET /v1/models HTTP/1.1" 200 -
+2026-08-25 21:29:35,596 - INFO - Prompt Cache: 0 sequences, 0.00 GB
+2026-08-25 21:29:35,597 - INFO - - assistant: 0 sequences, 0.00 GB
+2026-08-25 21:29:35,597 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:29:35,597 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:29:35] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:29:41,221 - INFO - Prompt processing progress: 175/207
+2026-08-25 21:29:41,351 - INFO - Prompt processing progress: 206/207
+2026-08-25 21:29:41,469 - INFO - Prompt processing progress: 207/207
+2026-08-25 21:29:42,062 - INFO - Prompt Cache: 1 sequences, 0.03 GB
+2026-08-25 21:29:42,062 - INFO - - assistant: 1 sequences, 0.03 GB
+2026-08-25 21:29:42,062 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:29:42,062 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:29:42] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:29:42,188 - INFO - Prompt processing progress: 1/1
+2026-08-25 21:30:01,461 - INFO - Prompt Cache: 1 sequences, 0.03 GB
+2026-08-25 21:30:01,461 - INFO - - assistant: 1 sequences, 0.03 GB
+2026-08-25 21:30:01,461 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:30:01,461 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:30:01] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:30:06,163 - INFO - Prompt processing progress: 2048/8334
+2026-08-25 21:30:11,103 - INFO - Prompt processing progress: 4096/8334
+2026-08-25 21:30:16,440 - INFO - Prompt processing progress: 6144/8334
+2026-08-25 21:30:22,167 - INFO - Prompt processing progress: 8192/8334
+2026-08-25 21:30:22,571 - INFO - Prompt processing progress: 8310/8334
+2026-08-25 21:30:22,720 - INFO - Prompt processing progress: 8333/8334
+2026-08-25 21:30:22,789 - INFO - Prompt processing progress: 8334/8334
+2026-08-25 21:30:34,441 - INFO - Prompt Cache: 2 sequences, 1.30 GB
+2026-08-25 21:30:34,441 - INFO - - assistant: 2 sequences, 1.30 GB
+2026-08-25 21:30:34,441 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:30:34,441 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:30:34] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:30:34,874 - INFO - Prompt processing progress: 36/37
+2026-08-25 21:30:34,921 - INFO - Prompt processing progress: 37/37
+2026-08-25 21:30:50,187 - INFO - Prompt Cache: 3 sequences, 2.58 GB
+2026-08-25 21:30:50,187 - INFO - - assistant: 3 sequences, 2.58 GB
+2026-08-25 21:30:50,187 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:30:50,187 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:30:50] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:30:50,606 - INFO - Prompt processing progress: 48/49
+2026-08-25 21:30:50,658 - INFO - Prompt processing progress: 49/49
+2026-08-25 21:31:40,232 - INFO - Prompt Cache: 4 sequences, 4.04 GB
+2026-08-25 21:31:40,232 - INFO - - assistant: 4 sequences, 4.04 GB
+2026-08-25 21:31:40,232 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:31:40,232 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:31:40] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:31:47,191 - INFO - Prompt processing progress: 2048/5238
+2026-08-25 21:31:54,585 - INFO - Prompt processing progress: 4096/5238
+2026-08-25 21:31:58,916 - INFO - Prompt processing progress: 5237/5238
+2026-08-25 21:31:58,990 - INFO - Prompt processing progress: 5238/5238
