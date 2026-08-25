@@ -183,7 +183,7 @@ The issue is closed against #711.
 This is not exactly our id: null bug.
 
 However, it confirms the architectural problem that matters to us:
-
+```
 Model-native tool representation
              │
              ▼
@@ -194,7 +194,7 @@ Model-native tool representation
              │
              ▼
         Agent client
-
+```
 The model and the agent client do not inherently speak exactly the same tool-calling dialect.
 
 mlx_lm.server is therefore not merely an HTTP wrapper around inference.
@@ -205,7 +205,7 @@ That adapter must normalize the model’s representation into the protocol expec
 
 ⸻
 
-5. Missing IDs Are Already an Explicit MLX Concern
+## 5. Missing IDs Are Already an Explicit MLX Concern
 
 A second MLX issue provides particularly strong evidence.
 
