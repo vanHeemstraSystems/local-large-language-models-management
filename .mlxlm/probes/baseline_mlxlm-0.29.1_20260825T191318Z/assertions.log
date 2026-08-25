@@ -1,0 +1,23 @@
+[19:13:18Z] results_dir=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/probes/tool_protocol_20260825T191318Z
+[19:13:18Z] base_url=http://127.0.0.1:8080/v1
+[19:13:18Z] model=/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+[19:13:18Z] server reachable http=200
+[19:13:18Z] --- MODE A: stream=false ---
+[19:13:33Z] nonstream http=200 bytes=     927
+PASS: [nonstream] tool_calls detected: count=1
+PASS: [nonstream.call[0]] id present and non-null: call_b2638d021ca84f69802c2777
+PASS: [nonstream.call[0]] type == 'function'
+PASS: [nonstream.call[0]] function.name == 'get_current_directory'
+PASS: [nonstream.call[0]] arguments valid JSON: {}
+[19:13:33Z] non-stream: PASS
+[19:13:33Z] --- MODE B: stream=true ---
+[19:13:34Z] stream http=200 bytes=    2570
+PASS: [stream] parsed 6 SSE events
+PASS: [stream] tool_call deltas observed across 1 logical call(s); finish_reason='stop'
+PASS: [stream.call[0]] id stable across deltas: 'call_f636396e93ab4859a47718e7'
+PASS: [stream.call[0]] id present and non-null: call_f636396e93ab4859a47718e7
+PASS: [stream.call[0]] type == 'function'
+PASS: [stream.call[0]] function.name == 'get_current_directory'
+PASS: [stream.call[0]] arguments valid JSON: {}
+[19:13:34Z] stream: PASS
+[19:13:34Z] ALL PASS

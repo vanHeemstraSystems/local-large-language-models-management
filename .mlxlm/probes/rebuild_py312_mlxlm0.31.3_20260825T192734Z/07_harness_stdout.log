@@ -1,0 +1,30 @@
+[19:29:33Z] results_dir=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/probes/rebuild_py312_mlxlm0.31.3_20260825T192734Z/tool_protocol
+[19:29:33Z] base_url=http://127.0.0.1:8080/v1
+[19:29:33Z] model=/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+[19:29:33Z] server reachable http=200
+[19:29:33Z] --- MODE A: stream=false ---
+[19:29:42Z] nonstream http=200 bytes=     680
+PASS: [nonstream] tool_calls detected: count=1
+PASS: [nonstream.call[0]] id present and non-null: 60796e0f-0966-4c18-92bf-94b420c09a2d
+PASS: [nonstream.call[0]] type == 'function'
+PASS: [nonstream.call[0]] function.name == 'get_current_directory'
+PASS: [nonstream.call[0]] arguments valid JSON: {}
+[19:29:42Z] non-stream: PASS
+[19:29:42Z] --- MODE B: stream=true ---
+[19:29:42Z] stream http=200 bytes=    1713
+PASS: [stream] parsed 4 SSE events
+PASS: [stream] tool_call deltas observed across 1 logical call(s); finish_reason='tool_calls'
+PASS: [stream.call[0]] id stable across deltas: 'fb1e5cd8-13cc-43fc-b295-2112ee360230'
+PASS: [stream.call[0]] id present and non-null: fb1e5cd8-13cc-43fc-b295-2112ee360230
+PASS: [stream.call[0]] type == 'function'
+PASS: [stream.call[0]] function.name == 'get_current_directory'
+PASS: [stream.call[0]] arguments valid JSON: {}
+[19:29:42Z] stream: PASS
+tool-protocol test summary
+timestamp: 20260825T192933Z
+base_url:  http://127.0.0.1:8080/v1
+model:     /Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+nonstream: PASS
+stream:    PASS
+results:   /Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/probes/rebuild_py312_mlxlm0.31.3_20260825T192734Z/tool_protocol
+[19:29:42Z] ALL PASS

@@ -1,0 +1,10 @@
+# baseline environment
+captured_at_utc: 2026-08-25T19:14:06Z
+python: Python 3.9.6
+mlx_lm: 0.29.1
+mlx:    0.29.3
+uname:  Darwin mac-mini-king-elvis 25.5.0 Darwin Kernel Version 25.5.0: Tue Jun  9 22:28:34 PDT 2026; root:xnu-12377.121.10~1/RELEASE_ARM64_T6041 arm64
+sw_vers: ProductName:		macOS ProductVersion:		26.5.2 BuildVersion:		25F84 
+
+# a.1 patch presence (memo6 §7 id fix) in server.py:
+1074:                "id": f"call_{uuid.uuid4().hex[:24]}",

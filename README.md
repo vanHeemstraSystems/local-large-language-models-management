@@ -14,7 +14,7 @@ Verified on Apple M4 Pro · 14 cores · 24 GiB · macOS 26.5.2 (arm64).
 
 ## Start here
 
-- **[QUICKSTART.md](QUICKSTART.md)** — step-by-step operator guide: prerequisites, venv setup, the required A.1 patch, daily workflow, known errors, an end-to-end example, and the Intent BYOA billing/credits guide.
+- **[QUICKSTART.md](QUICKSTART.md)** — step-by-step operator guide: prerequisites, venv setup, daily workflow, known errors, an end-to-end example, and the Intent BYOA billing/credits guide.
 - **[STRATEGY.md](STRATEGY.md)** — the *why*: safety principles, maturity criteria, tuning discipline, failure interpretation.
 
 ## Authoritative files
@@ -22,7 +22,7 @@ Verified on Apple M4 Pro · 14 cores · 24 GiB · macOS 26.5.2 (arm64).
 | File | Authoritative for |
 |---|---|
 | `opencode.json` | Provider endpoint, default model, `context 16384` / `max_output_tokens 1536`, MCP wiring, compaction, tool-output caps, side-band agent settings (W1 workaround). |
-| `.mlxlm/PATCHES.md` | The **A.1 venv patch** that makes `mlx_lm.server` emit OpenAI-spec-compliant `tool_calls[].id` values. Not committed to the repo — must be re-applied when the venv is rebuilt. |
+| `.mlxlm/PATCHES.md` | Retired **A.1 venv patch** history and rollback recipe. On mlx-lm 0.31.3 the upstream `ToolCallFormatter` supplies OpenAI-spec-compliant `tool_calls[].id` values natively, so no patch is applied on the current stack. |
 | `.mlxlm/serve.sh` | Lifecycle wrapper (`start` / `stop` / `status` / `log`) for `mlx-lm.server` in `~/.mlxlm/venv`. |
 | `STRATEGY.md` | Operating principles and safety baseline (18 GB resident cap, 16,384 ctx, 1,536 max tokens, 4-bit KV). |
 | `QUICKSTART.md` | Operator workflow, verification steps, known errors, Intent BYOA setup. |
@@ -32,23 +32,23 @@ If any documentation disagrees with `opencode.json` or `.mlxlm/PATCHES.md`, the 
 ## What is in this repo
 
 - `.mlxlm/serve.sh` — start/stop/status wrapper for `mlx-lm.server` at `127.0.0.1:8080`.
-- `.mlxlm/PATCHES.md` — the required A.1 venv patch (one-line `tool_calls[].id` fix).
+- `.mlxlm/PATCHES.md` — retired A.1 venv patch: history, rationale, and rollback path (the pre-upgrade Python 3.9 venv is preserved at `~/.mlxlm/venv-py39-mlxlm0291.bak`).
 - `.mlxlm/probes/` — four-probe baseline suite (transport / modeling / resource / long-context) and reproducible artifacts under `baseline_postmerge_*`.
 - `opencode.json` — OpenCode workspace configuration that wires the agent loop to the local endpoint and the Augment Context Engine MCP.
 - `QUICKSTART.md`, `STRATEGY.md` — see above.
-- `memo1.md`, `memo2.md`, `memo3.md` — background rationale (hardware, model choice, runtime selection). Not required to operate the stack.
+- `archive/memo1.md`, `archive/memo2.md`, `archive/memo3.md` — background rationale (hardware, model choice, runtime selection). Not required to operate the stack.
 - `scripts/mlxserve.sh`, `scripts/client_smoke.py`, `.mlxserve/` — **legacy** artifacts from the pre-migration `mlx-serve` stack. Retained for historical reference; see the *Legacy `mlx-serve` stack* appendix below.
 
 ## Prerequisites
 
 - Apple Silicon Mac with ≥ 24 GB unified memory (validated on M4 Pro / macOS 26.5.2).
 - Homebrew.
-- Python 3.9+ for a dedicated venv at `~/.mlxlm/venv`.
+- Python 3.10+ (validated on 3.12.13) for a dedicated venv at `~/.mlxlm/venv`.
 - `opencode` CLI (verified against 1.18.18).
 - `auggie` CLI with an authenticated Intent session (verified against 0.34.0).
 - ~20 GB free disk for model weights.
 
-Full setup — venv creation, model download, and the required A.1 venv patch — is in [QUICKSTART.md](QUICKSTART.md).
+Full setup — venv creation and model download — is in [QUICKSTART.md](QUICKSTART.md).
 
 ## Quickstart
 
@@ -56,8 +56,8 @@ Full setup — venv creation, model download, and the required A.1 venv patch �
 # 1. Start the local mlx-lm.server (127.0.0.1:8080).
 .mlxlm/serve.sh start
 
-# 2. Confirm the A.1 patch is in place (see .mlxlm/PATCHES.md).
-grep -n 'uuid.uuid4' ~/.mlxlm/venv/lib/python*/site-packages/mlx_lm/server.py
+# 2. Confirm the pinned mlx-lm version (0.31.3 supplies tool_calls[].id natively).
+~/.mlxlm/venv/bin/python -m pip show mlx-lm | grep -i '^Version:'
 
 # 3. Launch OpenCode from the repo root; it reads opencode.json.
 opencode
@@ -126,7 +126,7 @@ Both models must be downloaded once; see [QUICKSTART.md § 2](QUICKSTART.md#2-do
 - Alternate model: <https://huggingface.co/mlx-community/gpt-oss-20b-MXFP4-Q8>
 - OpenCode: <https://opencode.ai>
 - Intent by Augment: <https://www.augmentcode.com/guides/intent-walkthrough-prompt-to-merge>
-- Background rationale: `memo1.md`, `memo2.md`, `memo3.md`
+- Background rationale: `archive/memo1.md`, `archive/memo2.md`, `archive/memo3.md`
 
 ---
 
@@ -234,7 +234,7 @@ Known gaps at the time of the legacy measurements: edit-producing loop shape und
 
 ### Legacy fallback path
 
-If Qwen3-Coder-30B was too memory-constrained on the legacy stack, `memo3.md` marked Qwen 14B 4-bit as the comfortable fallback:
+If Qwen3-Coder-30B was too memory-constrained on the legacy stack, `archive/memo3.md` marked Qwen 14B 4-bit as the comfortable fallback:
 
 ```sh
 export MLXSERVE_PRIMARY_MODEL=mlx-community/<qwen-14b-4bit-repo-id>

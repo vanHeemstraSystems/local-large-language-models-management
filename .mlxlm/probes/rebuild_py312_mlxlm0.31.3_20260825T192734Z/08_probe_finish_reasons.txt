@@ -1,0 +1,4 @@
+p1_transport: finish_reasons=['stop'] tokens={'total': 8576, 'input': 8334, 'output': 237, 'reasoning': 0, 'cache': {'write': 0, 'read': 5}}
+p2_modeling: finish_reasons=['stop'] tokens={'total': 8723, 'input': 37, 'output': 370, 'reasoning': 0, 'cache': {'write': 0, 'read': 8316}}
+p3_resource: finish_reasons=['length'] tokens={'total': 9901, 'input': 49, 'output': 1536, 'reasoning': 0, 'cache': {'write': 0, 'read': 8316}}
+p4_longctx: finish_reasons=['stop'] tokens={'total': 13889, 'input': 5238, 'output': 335, 'reasoning': 0, 'cache': {'write': 0, 'read': 8316}}

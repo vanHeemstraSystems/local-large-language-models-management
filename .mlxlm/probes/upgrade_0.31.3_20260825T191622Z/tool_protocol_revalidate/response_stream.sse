@@ -1,0 +1,14 @@
+data: {"id": "chatcmpl-28108399-7268-48b6-af17-08dee69f7169", "system_fingerprint": "0.29.1-0.29.3-macOS-26.5.2-arm64-arm-64bit-applegpu_g16s", "object": "chat.completion.chunk", "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "created": 1787685481, "choices": [{"index": 0, "finish_reason": null, "delta": {"role": "assistant", "content": "<think>", "tool_calls": []}}]}
+
+data: {"id": "chatcmpl-28108399-7268-48b6-af17-08dee69f7169", "system_fingerprint": "0.29.1-0.29.3-macOS-26.5.2-arm64-arm-64bit-applegpu_g16s", "object": "chat.completion.chunk", "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "created": 1787685481, "choices": [{"index": 0, "finish_reason": null, "delta": {"role": "assistant", "content": "\n\n", "tool_calls": []}}]}
+
+data: {"id": "chatcmpl-28108399-7268-48b6-af17-08dee69f7169", "system_fingerprint": "0.29.1-0.29.3-macOS-26.5.2-arm64-arm-64bit-applegpu_g16s", "object": "chat.completion.chunk", "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "created": 1787685481, "choices": [{"index": 0, "finish_reason": null, "delta": {"role": "assistant", "content": "</think>", "tool_calls": []}}]}
+
+data: {"id": "chatcmpl-28108399-7268-48b6-af17-08dee69f7169", "system_fingerprint": "0.29.1-0.29.3-macOS-26.5.2-arm64-arm-64bit-applegpu_g16s", "object": "chat.completion.chunk", "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "created": 1787685481, "choices": [{"index": 0, "finish_reason": null, "delta": {"role": "assistant", "content": "\n\n", "tool_calls": []}}]}
+
+data: {"id": "chatcmpl-28108399-7268-48b6-af17-08dee69f7169", "system_fingerprint": "0.29.1-0.29.3-macOS-26.5.2-arm64-arm-64bit-applegpu_g16s", "object": "chat.completion.chunk", "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "created": 1787685481, "choices": [{"index": 0, "finish_reason": null, "delta": {"role": "assistant", "content": "", "tool_calls": [{"function": {"name": "get_current_directory", "arguments": "{}"}, "type": "function", "id": "call_3b9607a4a1e24ff1bb0a7665"}]}}]}
+
+data: {"id": "chatcmpl-28108399-7268-48b6-af17-08dee69f7169", "system_fingerprint": "0.29.1-0.29.3-macOS-26.5.2-arm64-arm-64bit-applegpu_g16s", "object": "chat.completion.chunk", "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "created": 1787685481, "choices": [{"index": 0, "finish_reason": "stop", "delta": {"role": "assistant", "content": "", "tool_calls": []}}]}
+
+data: [DONE]
+

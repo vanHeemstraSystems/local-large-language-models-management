@@ -42,7 +42,7 @@ OpenCode
 OpenAI-compatible API
     |
     v
-mlx-lm.server (v0.29.1, ~/.mlxlm/venv; local A.1 patch)
+mlx-lm.server (v0.31.3, ~/.mlxlm/venv)
     |
     v
 Qwen3-8B-4bit (default)  //  gpt-oss-20b-MXFP4-Q8 (alternate)
@@ -70,7 +70,7 @@ The stack should be described according to demonstrated capability rather than i
 
 The following have been demonstrated end-to-end:
 
-- OpenCode can use the local `mlx-lm.server` endpoint (with the local A.1 venv patch that makes `tool_calls[].id` OpenAI-spec-compliant; see `.mlxlm/PATCHES.md`).
+- OpenCode can use the local `mlx-lm.server` endpoint (mlx-lm 0.31.3's upstream `ToolCallFormatter` supplies OpenAI-spec-compliant `tool_calls[].id` values natively; the historical A.1 venv patch that used to fix this on 0.29.1 is now retired — see `.mlxlm/PATCHES.md`).
 - Qwen3-8B-4bit can receive OpenCode tool definitions.
 - The model can request a tool.
 - OpenCode can execute the tool.
@@ -142,7 +142,7 @@ The `mlx-lm.server` CLI surface (see `python -m mlx_lm server --help`) is intent
 
 `.mlxlm/PATCHES.md`
 
-Authoritative for the local venv patch (A.1) that makes `mlx_lm.server` emit OpenAI-spec-compliant `tool_calls[].id` values. The patch is applied to `~/.mlxlm/venv/lib/python3.9/site-packages/mlx_lm/server.py:1074` and is not committed to the repository; it must be re-applied by hand whenever the venv is rebuilt or `mlx-lm` is upgraded.
+Historical record of the retired A.1 venv patch (mlx-lm 0.29.1) and its rollback path. On the current mlx-lm 0.31.3 stack the upstream `ToolCallFormatter` emits OpenAI-spec-compliant `tool_calls[].id` values on its own, so no venv patch is applied or needed. Rollback to the patched 0.29.1 stack is by restoring the preserved `~/.mlxlm/venv-py39-mlxlm0291.bak` venv, not by re-applying the patch by hand.
 
 ### Documentation
 
@@ -169,7 +169,7 @@ Recommended operating behaviour:
 
 1. Start from the committed, verified baseline.
 2. Start `mlx-lm.server` before beginning the coding-agent session (via the local venv, e.g. `~/.mlxlm/venv/bin/python -m mlx_lm server --host 127.0.0.1 --port 8080 --log-level INFO`).
-3. Confirm that the expected model appears at the first request in the `mlx-lm.server` startup log and that the local A.1 patch is in place (`.mlxlm/PATCHES.md`).
+3. Confirm that the expected model appears at the first request in the `mlx-lm.server` startup log. On the current mlx-lm 0.31.3 stack no local A.1 patch is required (`.mlxlm/PATCHES.md`).
 4. Start OpenCode with only the tools/MCP services required for the task.
 5. Prefer repository retrieval over manually injecting large files into the conversation.
 6. Keep individual retrieval results focused.
@@ -317,10 +317,10 @@ Migration to `mlx-lm 0.29.1` exposed three runtime-layer client-server contract 
 | # | Gap | Impact | Mitigation on this stack | Evidence |
 |---|---|---|---|---|
 | W4 | `BatchRotatingKVCache.merge` crashes on concurrent requests with different prompt lengths | Server 500 on legitimate parallel traffic | `opencode.json` disables the `title` and `summary` side-band agents so requests serialize | `.mlxlm/probes/upstream_bug_report.md` |
-| A.1 | `mlx_lm.server` hard-codes `tool_calls[].id: null`, violating the OpenAI spec | ai-sdk clients (OpenCode) abort the response mid-stream on any tool call | One-line local venv patch to `mlx_lm/server.py:1074` emitting `call_{uuid.hex[:24]}` | `.mlxlm/PATCHES.md`, `.mlxlm/probes/upstream_fr_tool_calls.md` |
+| A.1 (retired) | On mlx-lm 0.29.1, `mlx_lm.server` hard-coded `tool_calls[].id: null`, violating the OpenAI spec | ai-sdk clients (OpenCode) aborted mid-stream on any tool call | Retired as of mlx-lm 0.31.3: upstream `ToolCallFormatter` supplies a non-null id natively. Historical one-line venv patch and rollback path documented in `.mlxlm/PATCHES.md` | `.mlxlm/PATCHES.md`, `.mlxlm/probes/upstream_fr_tool_calls.md`, `.mlxlm/probes/rebuild_py312_mlxlm0.31.3_20260825T192734Z/` |
 | P3 Harmony | `mlx_lm.server` does not parse `gpt-oss` Harmony `commentary` channels into structured `tool_calls[]` | `gpt-oss-20b` cannot complete MCP tool loops | Not fixed at the runtime layer; the current default model is Qwen3-8B-4bit which uses the standard `<tool_call>` idiom | `.mlxlm/probes/harmony_adapter_analysis.md` |
 
-The A.1 patch is a documented, reversible modification to the local `~/.mlxlm/venv`. It is not committed to the repository; it is re-applied by hand when the venv is rebuilt or `mlx-lm` is upgraded. Drafted upstream reports for W4 and A.1 are prepared under `.mlxlm/probes/` and pending filing at `ml-explore/mlx-lm`.
+The A.1 patch is retired as of mlx-lm 0.31.3, which ships an upstream `ToolCallFormatter` that emits a non-null `tool_calls[].id` natively. The historical patch is documented in `.mlxlm/PATCHES.md` alongside its rollback path (restore the preserved `~/.mlxlm/venv-py39-mlxlm0291.bak` venv). The drafted upstream report for W4 remains under `.mlxlm/probes/` and pending filing at `ml-explore/mlx-lm`.
 
 ## Experimental discipline
 

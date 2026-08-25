@@ -1,0 +1,58 @@
+--- pip show mlx-lm (pre) ---
+Name: mlx-lm
+Version: 0.29.1
+Summary: LLMs with MLX and the Hugging Face Hub
+Home-page: https://github.com/ml-explore/mlx-lm
+Author: MLX Contributors
+Author-email: mlx@group.apple.com
+License: MIT
+Location: /Users/willemvanheemstra/.mlxlm/venv/lib/python3.9/site-packages
+Requires: jinja2, mlx, numpy, protobuf, pyyaml, sentencepiece, transformers
+Required-by: 
+
+--- python -c import + version ---
+/Users/willemvanheemstra/.mlxlm/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+mlx_lm.__version__= 0.29.1
+
+--- server.py path ---
+-rw-r--r--@ 1 willemvanheemstra  staff  56077 Aug 24 00:05 /Users/willemvanheemstra/.mlxlm/venv/lib/python3.9/site-packages/mlx_lm/server.py
+
+--- A.1 patched line grep (call_ uuid) ---
+358:    tool_call_start: str
+359:    tool_call_end: str
+570:                        tool_call_start=tokenizer.tool_call_start,
+571:                        tool_call_end=tokenizer.tool_call_end,
+729:                tool_call_start=tokenizer.tool_call_start,
+730:                tool_call_end=tokenizer.tool_call_end,
+1074:                "id": f"call_{uuid.uuid4().hex[:24]}",
+1227:            if ctx.has_tool_calling and gen.text == ctx.tool_call_start:
+1230:                if gen.text == ctx.tool_call_end:
+
+--- A.1 context around line 1074 ---
+
+        def parse_function(tool_text):
+            tool_call = json.loads(tool_text.strip())
+            return {
+                "function": {
+                    "name": tool_call.get("name", None),
+                    "arguments": json.dumps(tool_call.get("arguments", "")),
+                },
+                "type": "function",
+                "id": f"call_{uuid.uuid4().hex[:24]}",
+            }
+
+        # Static response
+        response = {
+            "id": self.request_id,
+            "system_fingerprint": self.system_fingerprint,
+            "object": self.object_type,
+            "model": self.requested_model,
+            "created": self.created,
+            "choices": [
+                {
+
+--- ToolCallFormatter class present? ---
+/Users/willemvanheemstra/.mlxlm/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+has ToolCallFormatter: False

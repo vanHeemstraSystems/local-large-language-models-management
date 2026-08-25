@@ -1,0 +1,18 @@
+=== p1_transport ===
+  rec[2].part.reason = stop
+  rec[2].part.tokens = {'total': 8651, 'input': 8339, 'output': 312, 'reasoning': 0, 'cache': {'write': 0, 'read': 0}}
+=== p2_modeling ===
+  rec[2].part.reason = stop
+  rec[2].part.tokens = {'total': 8679, 'input': 8353, 'output': 326, 'reasoning': 0, 'cache': {'write': 0, 'read': 0}}
+=== p3_resource ===
+  rec[3].part.reason = stop
+  rec[3].part.tokens = {'total': 8862, 'input': 8365, 'output': 497, 'reasoning': 0, 'cache': {'write': 0, 'read': 0}}
+  rec[6].part.reason = stop
+  rec[6].part.tokens = {'total': 13042, 'input': 12739, 'output': 303, 'reasoning': 0, 'cache': {'write': 0, 'read': 0}}
+=== p4_longctx ===
+  rec[2].part.reason = stop
+  rec[2].part.tokens = {'total': 13880, 'input': 13554, 'output': 326, 'reasoning': 0, 'cache': {'write': 0, 'read': 0}}
+
+--- last 40 lines of new servelog since harness+probes ---
+      21 .mlxlm/probes/upgrade_0.31.3_20260825T191622Z/serve_delta.log
+--- traceback grep ---

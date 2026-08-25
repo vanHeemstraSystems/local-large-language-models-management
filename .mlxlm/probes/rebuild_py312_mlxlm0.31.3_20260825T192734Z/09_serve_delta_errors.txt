@@ -1,0 +1,2 @@
+=== grep -E 'Traceback|Error|Exception|BatchRotating|shape mismatch' ===
+(no matches)

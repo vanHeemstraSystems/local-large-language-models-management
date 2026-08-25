@@ -1,0 +1,6 @@
+127.0.0.1 - - [25/Aug/2026 21:18:18] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:18:23,432 - INFO - Prompt processing progress: 2048/8334
+2026-08-25 21:18:28,485 - INFO - Prompt processing progress: 4096/8334
+2026-08-25 21:18:33,935 - INFO - Prompt processing progress: 6144/8334
+2026-08-25 21:18:39,767 - INFO - Prompt processing progress: 8192/8334
+2026-08-25 21:18:40,269 - INFO - Prompt processing progress: 8333/8334

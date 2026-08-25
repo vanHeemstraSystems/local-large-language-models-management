@@ -1,0 +1,23 @@
+=== BACKUP VENV RENAME ===
+renamed: ~/.mlxlm/venv -> ~/.mlxlm/venv-py39-mlxlm0291.bak
+2026-08-25T19:27:42Z
+
+=== Backup venv python symlinks ===
+lrwxr-xr-x@ 1 willemvanheemstra  staff   7 Aug 23 23:01 /Users/willemvanheemstra/.mlxlm/venv-py39-mlxlm0291.bak/bin/python -> python3
+lrwxr-xr-x@ 1 willemvanheemstra  staff  58 Aug 23 23:01 /Users/willemvanheemstra/.mlxlm/venv-py39-mlxlm0291.bak/bin/python3 -> /Applications/Xcode.app/Contents/Developer/usr/bin/python3
+lrwxr-xr-x@ 1 willemvanheemstra  staff   7 Aug 23 23:01 /Users/willemvanheemstra/.mlxlm/venv-py39-mlxlm0291.bak/bin/python3.9 -> python3
+
+=== Backup venv mlx-lm version ===
+/Users/willemvanheemstra/.mlxlm/venv-py39-mlxlm0291.bak/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+mlx_lm 0.29.1
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+AttributeError: module 'mlx' has no attribute '__version__'
+
+=== Backup A.1 patch grep (lib/python3.9 server.py:1074) ===
+358:    tool_call_start: str
+359:    tool_call_end: str
+570:                        tool_call_start=tokenizer.tool_call_start,
+571:                        tool_call_end=tokenizer.tool_call_end,
+729:                tool_call_start=tokenizer.tool_call_start,

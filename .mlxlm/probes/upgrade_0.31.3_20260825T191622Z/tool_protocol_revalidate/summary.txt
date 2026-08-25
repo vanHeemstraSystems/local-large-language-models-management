@@ -1,0 +1,7 @@
+tool-protocol test summary
+timestamp: 20260825T191751Z
+base_url:  http://127.0.0.1:8080/v1
+model:     /Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+nonstream: PASS
+stream:    PASS
+results:   .mlxlm/probes/upgrade_0.31.3_20260825T191622Z/tool_protocol_revalidate

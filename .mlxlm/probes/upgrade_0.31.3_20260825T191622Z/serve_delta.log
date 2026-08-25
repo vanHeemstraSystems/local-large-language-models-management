@@ -1,0 +1,21 @@
+127.0.0.1 - - [25/Aug/2026 21:17:51] "GET /v1/models HTTP/1.1" 200 -
+127.0.0.1 - - [25/Aug/2026 21:17:53] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:18:00,529 - INFO - Prompt processing progress: 206/207
+127.0.0.1 - - [25/Aug/2026 21:18:01] "POST /v1/chat/completions HTTP/1.1" 200 -
+127.0.0.1 - - [25/Aug/2026 21:18:18] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:18:23,432 - INFO - Prompt processing progress: 2048/8334
+2026-08-25 21:18:28,485 - INFO - Prompt processing progress: 4096/8334
+2026-08-25 21:18:33,935 - INFO - Prompt processing progress: 6144/8334
+2026-08-25 21:18:39,767 - INFO - Prompt processing progress: 8192/8334
+2026-08-25 21:18:40,269 - INFO - Prompt processing progress: 8333/8334
+127.0.0.1 - - [25/Aug/2026 21:18:53] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:18:53,623 - INFO - Prompt processing progress: 36/37
+127.0.0.1 - - [25/Aug/2026 21:19:06] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:19:07,115 - INFO - Prompt processing progress: 48/49
+127.0.0.1 - - [25/Aug/2026 21:19:23] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:19:30,842 - INFO - Prompt processing progress: 2048/3915
+2026-08-25 21:19:37,764 - INFO - Prompt processing progress: 3914/3915
+127.0.0.1 - - [25/Aug/2026 21:19:51] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:19:58,887 - INFO - Prompt processing progress: 2048/5238
+2026-08-25 21:20:06,220 - INFO - Prompt processing progress: 4096/5238
+2026-08-25 21:20:10,489 - INFO - Prompt processing progress: 5237/5238

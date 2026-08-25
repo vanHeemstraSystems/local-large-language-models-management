@@ -1,12 +1,11 @@
 # Memo 6: Stabilising OpenAI-Compatible Tool Calling for MLXServe, Qwen3-Coder and OpenCode
 
-Status: Investigation / implementation guidance  
-Date: 25 August 2026  
-Scope: Local LLM tool calling on Apple Silicon using Qwen3-Coder, MLX/MLXServe and OpenCode  
+Status: Investigation / implementation guidanceDate: 25 August 2026Scope: Local LLM tool calling on Apple Silicon using Qwen3-Coder, MLX/MLXServe and OpenCode
 
 ## 1. Purpose
 
 Our local development stack currently follows approximately this path:
+
 ```
 OpenCode
    │
@@ -17,11 +16,13 @@ MLXServe / mlx_lm.server
    ▼
 Qwen3-Coder-30B-A3B-Instruct-4bit
 ```
+
 Normal inference works successfully.
 
 The remaining blocker is reliable agentic/tool-calling operation.
 
 We observed responses in which:
+
 ```
 {
   "tool_calls": [
@@ -36,6 +37,7 @@ We observed responses in which:
   ]
 }
 ```
+
 OpenCode expects an OpenAI-compatible tool-call structure with a usable tool-call ID. A null ID causes the agentic interaction to fail.
 
 New upstream information substantially narrows where this problem should be solved and changes our preferred strategy.
@@ -57,6 +59,7 @@ Its ToolCallFormatter contains logic equivalent to:
 tc_id = tc.pop("id", None) or str(uuid.uuid4())
 
 and subsequently constructs:
+
 ```
 {
     "function": tc,
@@ -64,17 +67,19 @@ and subsequently constructs:
     "id": tc_id,
 }
 ```
+
 For streaming responses it additionally supplies an index.
 
 Reference:
 
-* mlx-lm server.py
+- mlx-lm server.py
 
 This is highly significant.
 
 It means current upstream MLX explicitly recognizes that a model/parser may produce a tool call without an ID and compensates for that at the OpenAI compatibility boundary. (GitHub)
 
 Therefore, under current upstream behaviour:
+
 ```
 Qwen3 tool call
       │
@@ -94,6 +99,7 @@ OpenAI-compatible tool_call
       │
       └── id != null
 ```
+
 This is almost exactly the behaviour required by OpenCode.
 
 Our observed id: null therefore requires explanation.
@@ -107,6 +113,7 @@ Previously it was reasonable to suspect that Qwen3 simply failed to generate a f
 That is now too simplistic.
 
 A model-native tool call does not necessarily need to contain every piece of OpenAI protocol metadata. The compatibility server can normalize model-native output into the API contract expected by its client.
+
 ```
 The likely failure is therefore somewhere in:
 
@@ -130,6 +137,7 @@ SSE / OpenAI response
      ▼
 OpenCode
 ```
+
 The immediate question is:
 
 Is the version of mlx-lm actually used by MLXServe running the current ToolCallFormatter implementation?
@@ -170,7 +178,7 @@ This tells us that ID normalization is important, but not sufficient. The entire
 
 Relevant upstream issue:
 
-* mlx-lm #607 — mlx_lm.server crashes when tool_calls aren’t JSON
+- mlx-lm #607 — mlx_lm.server crashes when tool_calls aren’t JSON
 
 Issue #607 involved Codex/OpenCode clients and a GLM model.
 
@@ -183,6 +191,7 @@ The issue is closed against #711.
 This is not exactly our id: null bug.
 
 However, it confirms the architectural problem that matters to us:
+
 ```
 Model-native tool representation
              │
@@ -195,6 +204,7 @@ Model-native tool representation
              ▼
         Agent client
 ```
+
 The model and the agent client do not inherently speak exactly the same tool-calling dialect.
 
 mlx_lm.server is therefore not merely an HTTP wrapper around inference.
@@ -211,7 +221,7 @@ A second MLX issue provides particularly strong evidence.
 
 Reference:
 
-* mlx-lm #1375 — generated tool-call UUIDs conflict with Mistral templates
+- mlx-lm #1375 — generated tool-call UUIDs conflict with Mistral templates
 
 That issue reports that when a tool call arrives without an ID, mlx_lm.server generates one using:
 
@@ -235,13 +245,14 @@ We therefore should not introduce Qwen-specific ID generation unless evidence sh
 
 Reference:
 
-* OpenAI Developer Community — handling aborted tool calls
+- OpenAI Developer Community — handling aborted tool calls
 
 This discussion describes a different but related problem.
 
 A valid tool call can be persisted into conversation state, after which execution is interrupted before its corresponding tool result is recorded.
 
 This creates:
+
 ```
 assistant
     │
@@ -251,6 +262,7 @@ assistant
              │
              └── no tool result for A
 ```
+
 Subsequent interaction may then fail because the conversation contains an orphaned tool call.
 
 The discussion describes race conditions around repairing that state, and a later contribution points to an openai-python issue covering stream cancellation and conversation state becoming inconsistent. (OpenAI Developer Community)
@@ -258,6 +270,7 @@ The discussion describes race conditions around repairing that state, and a late
 This is useful background, but it should not be treated as the primary fix for our problem.
 
 Our failure occurs earlier:
+
 ```
 Qwen3
   │
@@ -273,6 +286,7 @@ tool_call
         OpenCode
            X
 ```
+
 Trying to repair conversation state after this would treat a symptom rather than fixing the protocol boundary.
 
 The OpenAI discussion does, however, reinforce an important design requirement:
@@ -286,6 +300,7 @@ Tool-call identity must be valid and stable throughout the complete tool-call li
 We should define the MLXServe/OpenCode boundary explicitly.
 
 A tool call leaving our local inference server should satisfy at least:
+
 ```
 tool_call
 ├── id
@@ -302,7 +317,9 @@ tool_call
 └── index
     └── correct when streaming
 ```
+
 The same ID must remain associated with the call during:
+
 ```
 tool-call stream
        │
@@ -317,6 +334,7 @@ tool result
        │
        └── tool_call_id = original ID
 ```
+
 We should think of this as an invariant rather than an implementation detail.
 
 ⸻
@@ -324,6 +342,7 @@ We should think of this as an invariant rather than an implementation detail.
 ## 8. Desired Architecture
 
 The preferred architecture is:
+
 ```
 ┌──────────────────────────────┐
 │ Qwen3-Coder                  │
@@ -364,6 +383,7 @@ The preferred architecture is:
 │ OpenCode                     │
 └──────────────────────────────┘
 ```
+
 The protocol normalizer should ideally be upstream mlx_lm.server, rather than software maintained by us.
 
 ⸻
@@ -377,15 +397,18 @@ We should pursue the following options in order.
 Preferred strategy.
 
 Determine exactly which versions are running:
+
 ```
 python - <<'PY'
 import mlx_lm
 print(mlx_lm.__version__)
 PY
 ```
+
 Also identify the MLXServe version and its dependency declaration for mlx-lm.
 
 Then inspect the actual installed formatter:
+
 ```
 python - <<'PY'
 import inspect
@@ -393,6 +416,7 @@ import mlx_lm.server
 print(inspect.getsource(mlx_lm.server.ToolCallFormatter))
 PY
 ```
+
 We specifically want to determine whether it contains:
 
 tc_id = tc.pop("id", None) or str(uuid.uuid4())
@@ -404,6 +428,7 @@ If a supported upgrade gives us the current implementation, upgrade and retest b
 Success condition
 
 A streamed Qwen3-Coder tool call reaches OpenCode with:
+
 ```
 {
   "id": "<non-null-value>",
@@ -414,6 +439,7 @@ A streamed Qwen3-Coder tool call reaches OpenCode with:
   }
 }
 ```
+
 and OpenCode successfully executes the tool and continues the agent turn.
 
 ⸻
@@ -432,26 +458,32 @@ Capture the tool call at four points:
 This gives us a simple fault-isolation test.
 
 If:
+
 ```
 parser            id = None
 formatter         id = UUID
 HTTP/SSE          id = UUID
 OpenCode          id = UUID
 ```
+
 the ID problem is solved and another tool-calling incompatibility is responsible.
 
 If:
+
 ```
 formatter         id = UUID
 HTTP/SSE          id = null
 ```
+
 the problem is in MLXServe’s serialization/streaming layer.
 
 If:
+
 ```
 HTTP/SSE          id = UUID
 OpenCode          id = null
 ```
+
 investigate OpenCode.
 
 We should only patch the component where the information is actually lost.
@@ -469,12 +501,15 @@ tc_id = tc.pop("id", None) or str(uuid.uuid4())
 The critical requirement is that the generated ID is created once per logical tool call, not independently for every streamed chunk.
 
 Incorrect:
+
 ```
 delta 1 → UUID A
 delta 2 → UUID B
 delta 3 → UUID C
 ```
+
 Correct:
+
 ```
 logical tool call → UUID A
 delta 1 → A
@@ -482,6 +517,7 @@ delta 2 → A
 delta 3 → A
 tool result → A
 ```
+
 We should keep such a patch small enough that it can later be removed when MLXServe incorporates the relevant upstream behaviour.
 
 ⸻
@@ -491,6 +527,7 @@ We should keep such a patch small enough that it can later be removed when MLXSe
 Only introduce a proxy if MLXServe cannot be corrected cleanly.
 
 The architecture would become:
+
 ```
 OpenCode
    │
@@ -510,15 +547,16 @@ MLXServe
    ▼
 Qwen3-Coder
 ```
+
 This has one strategic advantage: it could normalize multiple local model families.
 
 However, it also adds:
 
-* another service;
-* another failure point;
-* additional maintenance;
-* potential streaming complexity;
-* possible latency.
+- another service;
+- another failure point;
+- additional maintenance;
+- potential streaming complexity;
+- possible latency.
 
 Therefore:
 
@@ -533,6 +571,7 @@ A proxy becomes attractive only if we discover a broader and recurring incompati
 OpenCode is correctly useful to us precisely because it can consume an OpenAI-compatible endpoint.
 
 Making OpenCode tolerate malformed responses would invert responsibility:
+
 ```
 Bad:
 server violates contract
@@ -540,7 +579,9 @@ server violates contract
         ▼
 every client compensates
 ```
+
 versus:
+
 ```
 Preferred:
 model-native output
@@ -551,6 +592,7 @@ server normalizes
         ▼
 standards-compatible clients
 ```
+
 We want the latter.
 
 This also means other OpenAI-compatible clients can subsequently use the same local endpoint.
@@ -562,6 +604,7 @@ This also means other OpenAI-compatible clients can subsequently use the same lo
 Before declaring the problem solved, create a minimal repeatable interoperability test.
 
 It should define a harmless tool such as:
+
 ```
 {
   "type": "function",
@@ -575,6 +618,7 @@ It should define a harmless tool such as:
   }
 }
 ```
+
 Ask Qwen3-Coder something that unambiguously requires the tool.
 
 Test both:
@@ -608,6 +652,7 @@ The streaming test is especially important because a non-streaming success does 
 Once fixed, capture the failure as a regression test.
 
 At minimum test:
+
 ```
 tool call without model-generated ID
 tool call with model-generated ID
@@ -622,6 +667,7 @@ aborted generation
 tool execution failure
 follow-up turn containing tool result
 ```
+
 A particularly important assertion is:
 
 assert tool_call["id"] is not None
@@ -663,6 +709,7 @@ Agentic protocol compatibility
 ## 17. Recommended Immediate Work
 
 Proceed in this order:
+
 ```
 1. Record MLXServe version
           │
@@ -703,6 +750,7 @@ Proceed in this order:
                 ▼
              retest
 ```
+
 Only if that fails should we consider an independent compatibility proxy.
 
 ⸻
@@ -729,27 +777,15 @@ Specifically:
 
 Primary
 
-* MLX-LM server.py
-    https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/server.py
-    Current ToolCallFormatter implementation, including generation of an ID when one is absent. (GitHub)
-* MLX-LM Issue #607 — mlx_lm.server crashes when tool_calls aren’t JSON
-    https://github.com/ml-explore/mlx-lm/issues/607
-    Demonstrates OpenCode/Codex interoperability failure caused by model-native tool-call syntax not being normalized correctly. (GitHub)
-* MLX-LM Issue #1375 — generated UUID tool-call IDs and Mistral constraints
-    https://github.com/ml-explore/mlx-lm/issues/1375
-    Confirms that mlx_lm.server generates an ID when a tool call does not contain one. (GitHub)
-* OpenAI Developer Community — safely handling aborted tool calls
-    https://community.openai.com/t/how-to-safely-handle-aborted-tool-calls-when-using-openai-conversations-api/1372554
-    Relevant to maintaining consistent tool-call/tool-result state after interruption, but downstream of our current id: null problem. (OpenAI Developer Community)
+- MLX-LM server.py[https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/server.py](https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/server.py)Current ToolCallFormatter implementation, including generation of an ID when one is absent. (GitHub)
+- MLX-LM Issue #607 — mlx_lm.server crashes when tool_calls aren’t JSON[https://github.com/ml-explore/mlx-lm/issues/607](https://github.com/ml-explore/mlx-lm/issues/607)Demonstrates OpenCode/Codex interoperability failure caused by model-native tool-call syntax not being normalized correctly. (GitHub)
+- MLX-LM Issue #1375 — generated UUID tool-call IDs and Mistral constraints[https://github.com/ml-explore/mlx-lm/issues/1375](https://github.com/ml-explore/mlx-lm/issues/1375)Confirms that mlx_lm.server generates an ID when a tool call does not contain one. (GitHub)
+- OpenAI Developer Community — safely handling aborted tool calls[https://community.openai.com/t/how-to-safely-handle-aborted-tool-calls-when-using-openai-conversations-api/1372554](https://community.openai.com/t/how-to-safely-handle-aborted-tool-calls-when-using-openai-conversations-api/1372554)Relevant to maintaining consistent tool-call/tool-result state after interruption, but downstream of our current id: null problem. (OpenAI Developer Community)
 
 Additional evidence
 
-* MLX-LM Issue #1627 — Qwen3-Coder parser rejects float-formatted integer arguments
-    https://github.com/ml-explore/mlx-lm/issues/1627
-    Demonstrates that parser-level incompatibilities can silently remove Qwen3-Coder tool calls and destabilize agent clients. (GitHub)
-* MLX-LM Issue #1374 — valid Mistral tool calls dropped by parser
-    https://github.com/ml-explore/mlx-lm/issues/1374
-    Additional evidence that model-native tool representations must be correctly normalized before reaching an agent client. (GitHub)
+- MLX-LM Issue #1627 — Qwen3-Coder parser rejects float-formatted integer arguments[https://github.com/ml-explore/mlx-lm/issues/1627](https://github.com/ml-explore/mlx-lm/issues/1627)Demonstrates that parser-level incompatibilities can silently remove Qwen3-Coder tool calls and destabilize agent clients. (GitHub)
+- MLX-LM Issue #1374 — valid Mistral tool calls dropped by parser[https://github.com/ml-explore/mlx-lm/issues/1374](https://github.com/ml-explore/mlx-lm/issues/1374)Additional evidence that model-native tool representations must be correctly normalized before reaching an agent client. (GitHub)
 
 ⸻
 
@@ -758,6 +794,7 @@ Additional evidence
 The target is not merely to make one OpenCode command succeed.
 
 The target is:
+
 ```
                     LOCAL AGENT STACK
               ┌────────────────────┐
@@ -779,6 +816,7 @@ The target is:
               │  Local inference   │
               └────────────────────┘
 ```
+
 Once this boundary is reliable, OpenCode should be able to perform local agentic coding with Qwen3-Coder without depending on cloud inference merely because of tool-protocol incompatibilities.
 
 That is the appropriate foundation for the Local LLMs project: local inference behind a well-tested OpenAI-compatible agent interface, rather than client-specific workarounds.

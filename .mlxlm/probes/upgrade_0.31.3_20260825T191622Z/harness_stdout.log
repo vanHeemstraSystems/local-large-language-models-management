@@ -1,0 +1,31 @@
+[19:17:51Z] results_dir=.mlxlm/probes/upgrade_0.31.3_20260825T191622Z/tool_protocol_revalidate
+[19:17:51Z] base_url=http://127.0.0.1:8080/v1
+[19:17:51Z] model=/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+[19:17:51Z] server reachable http=200
+[19:17:51Z] --- MODE A: stream=false ---
+[19:18:00Z] nonstream http=200 bytes=     927
+PASS: [nonstream] tool_calls detected: count=1
+PASS: [nonstream.call[0]] id present and non-null: call_6851a648967748059243bf57
+PASS: [nonstream.call[0]] type == 'function'
+PASS: [nonstream.call[0]] function.name == 'get_current_directory'
+PASS: [nonstream.call[0]] arguments valid JSON: {}
+[19:18:01Z] non-stream: PASS
+[19:18:01Z] --- MODE B: stream=true ---
+[19:18:01Z] stream http=200 bytes=    2570
+PASS: [stream] parsed 6 SSE events
+PASS: [stream] tool_call deltas observed across 1 logical call(s); finish_reason='stop'
+PASS: [stream.call[0]] id stable across deltas: 'call_3b9607a4a1e24ff1bb0a7665'
+PASS: [stream.call[0]] id present and non-null: call_3b9607a4a1e24ff1bb0a7665
+PASS: [stream.call[0]] type == 'function'
+PASS: [stream.call[0]] function.name == 'get_current_directory'
+PASS: [stream.call[0]] arguments valid JSON: {}
+[19:18:01Z] stream: PASS
+tool-protocol test summary
+timestamp: 20260825T191751Z
+base_url:  http://127.0.0.1:8080/v1
+model:     /Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+nonstream: PASS
+stream:    PASS
+results:   .mlxlm/probes/upgrade_0.31.3_20260825T191622Z/tool_protocol_revalidate
+[19:18:01Z] ALL PASS
+harness_exit=
