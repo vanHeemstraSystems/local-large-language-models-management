@@ -4,7 +4,7 @@ Status: Investigation / implementation guidance
 Date: 25 August 2026
 Scope: Local LLM tool calling on Apple Silicon using Qwen3-Coder, MLX/MLXServe and OpenCode
 
-#€ 1. Purpose
+## 1. Purpose
 
 Our local development stack currently follows approximately this path:
 ```
