@@ -1,8 +1,8 @@
 # Memo 6: Stabilising OpenAI-Compatible Tool Calling for MLXServe, Qwen3-Coder and OpenCode
 
-Status: Investigation / implementation guidance
-Date: 25 August 2026
-Scope: Local LLM tool calling on Apple Silicon using Qwen3-Coder, MLX/MLXServe and OpenCode
+Status: Investigation / implementation guidance  
+Date: 25 August 2026  
+Scope: Local LLM tool calling on Apple Silicon using Qwen3-Coder, MLX/MLXServe and OpenCode  
 
 ## 1. Purpose
 
