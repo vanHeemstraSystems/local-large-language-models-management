@@ -1,0 +1,19 @@
+# Preflight snapshot
+Tue Aug 25 19:43:23 UTC 2026
+
+## mlx-lm version
+Name: mlx-lm
+Version: 0.31.3
+Summary: LLMs with MLX and the Hugging Face Hub
+Home-page: https://github.com/ml-explore/mlx-lm
+Author: MLX Contributors
+
+## serve.sh status
+  PID    RSS COMMAND
+32020 5112448 /opt/homebrew/Cellar/python@3.12/3.12.13/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -m mlx_lm server --host 127.0.0.1 --port 8080 --model /Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8
+
+--- /v1/models ---
+{"object": "list", "data": [{"id": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8", "object": "model", "created": 1787687004}]}
+
+## Baseline log line count
+     123

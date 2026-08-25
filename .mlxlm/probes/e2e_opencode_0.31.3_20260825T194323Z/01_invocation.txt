@@ -1,0 +1,4 @@
+PROMPT: Read the file .mlxlm/PATCHES.md and quote the exact status line that says the A.1 patch is retired. Use your file-reading tool; do not guess.
+
+Command: opencode run --auto --pure -m "mlxlm//Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit" "<prompt>"
+CWD: /Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management

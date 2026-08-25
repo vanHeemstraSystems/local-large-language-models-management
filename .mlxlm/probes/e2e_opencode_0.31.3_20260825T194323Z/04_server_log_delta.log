@@ -1,0 +1,20 @@
+127.0.0.1 - - [25/Aug/2026 21:43:24] "GET /v1/models HTTP/1.1" 200 -
+2026-08-25 21:43:43,659 - INFO - Prompt Cache: 0 sequences, 0.00 GB
+2026-08-25 21:43:43,660 - INFO - - assistant: 0 sequences, 0.00 GB
+2026-08-25 21:43:43,660 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:43:43,660 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:43:43] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:43:55,125 - INFO - Prompt processing progress: 2048/8358
+2026-08-25 21:44:00,043 - INFO - Prompt processing progress: 4096/8358
+2026-08-25 21:44:05,327 - INFO - Prompt processing progress: 6144/8358
+2026-08-25 21:44:10,979 - INFO - Prompt processing progress: 8192/8358
+2026-08-25 21:44:11,387 - INFO - Prompt processing progress: 8315/8358
+2026-08-25 21:44:11,625 - INFO - Prompt processing progress: 8357/8358
+2026-08-25 21:44:11,678 - INFO - Prompt processing progress: 8358/8358
+2026-08-25 21:44:21,898 - INFO - Prompt Cache: 1 sequences, 1.28 GB
+2026-08-25 21:44:21,898 - INFO - - assistant: 1 sequences, 1.28 GB
+2026-08-25 21:44:21,898 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 21:44:21,898 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 21:44:21] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 21:44:25,717 - INFO - Prompt processing progress: 1192/1193
+2026-08-25 21:44:25,772 - INFO - Prompt processing progress: 1193/1193
