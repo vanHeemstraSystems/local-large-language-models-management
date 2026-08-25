@@ -8,7 +8,7 @@ Step-by-step operator guide for the validated `mlx-lm.server` + OpenCode + Augme
 
 - **Hardware:** Apple Silicon Mac with ≥ 24 GB unified memory (validated on M4 Pro / macOS 26.5.2).
 - **Homebrew** installed.
-- **Python 3.9+** available for a dedicated venv at `~/.mlxlm/venv`.
+- **Python 3.10+** (validated on 3.12.13) available for a dedicated venv at `~/.mlxlm/venv`.
 - `opencode`** CLI** (Homebrew: `brew install opencode`). Verified against 1.18.18.
 - `auggie`** CLI** (Augment Code) with an authenticated Intent session. Verified against 0.34.0.
 - **~20 GB free disk** for model weights.
@@ -49,8 +49,6 @@ Chat sessions started against an Auggie specialist (Coordinator, Implementor, PR
 
 - The public docs describe BYOA at Space creation but do not document a settings-panel path for switching provider on an *existing* Space. If Intent does not expose that toggle, create a fresh Space.
 - Some Intent side-band agents (workspace title/summary generators, review helpers) may always call Augment-hosted models. Confirm from the credit dashboard rather than assumption.
-- This QUICKSTART's stack still requires the A.1 venv patch to be in place before any tool-calling session (see below); a missing patch aborts BYOA sessions mid-stream on the first tool call.
-
 ## One-time setup
 
 ### 1. Create the mlx-lm venv
@@ -59,7 +57,7 @@ Chat sessions started against an Auggie specialist (Coordinator, Implementor, PR
 python3 -m venv ~/.mlxlm/venv
 source ~/.mlxlm/venv/bin/activate
 pip install --upgrade pip
-pip install "mlx-lm==0.29.1"
+pip install "mlx-lm==0.31.3"
 deactivate
 ```
 
@@ -74,28 +72,16 @@ huggingface-cli download mlx-community/Qwen3-8B-4bit \
   --local-dir Qwen3-8B-4bit --local-dir-use-symlinks False
 ```
 
-### 3. Apply the A.1 venv patch — **required**
+### 3. Confirm the installed mlx-lm version
 
-`mlx_lm.server` emits `tool_calls[].id: null`, which violates the OpenAI spec and causes OpenCode to abort mid-stream on any tool call. Patch it:
+`mlx-lm` 0.31.3 ships an upstream `ToolCallFormatter` that emits an OpenAI-spec-compliant `tool_calls[].id` on its own, so no venv patch is required. Verify the pinned version is installed:
 
 ```sh
-SRV=~/.mlxlm/venv/lib/python3.9/site-packages/mlx_lm/server.py
-cp "$SRV" "$SRV.pre-A1.bak"
-python3 - "$SRV" <<'PY'
-import sys, re, pathlib
-p = pathlib.Path(sys.argv[1])
-src = p.read_text()
-new = src.replace('                "id": None,',
-                  '                "id": f"call_{uuid.uuid4().hex[:24]}",')
-assert new != src, "A.1 patch anchor not found — inspect server.py manually"
-p.write_text(new)
-PY
-grep -n 'call_{uuid' "$SRV"   # expect a single match near line 1074
+~/.mlxlm/venv/bin/python -m pip show mlx-lm | grep -i '^Version:'
+# expect: Version: 0.31.3
 ```
 
-Details and reversal steps live in `.mlxlm/PATCHES.md`.
-
-> ⚠️ The patch does not survive pip install --upgrade mlx-lm. Re-apply after any venv rebuild or mlx-lm upgrade.
+Historical A.1 patch context (retired as of mlx-lm 0.31.3) and its rollback path live in `.mlxlm/PATCHES.md`.
 
 ## Daily workflow
 
@@ -108,13 +94,13 @@ Details and reversal steps live in `.mlxlm/PATCHES.md`.
 
 You should see a process listening on `127.0.0.1:8080` and `/v1/models` returning JSON.
 
-### 2. Verify the A.1 patch is in place
+### 2. Verify the installed mlx-lm version
 
 ```sh
-grep -n 'call_{uuid' ~/.mlxlm/venv/lib/python3.9/site-packages/mlx_lm/server.py
+~/.mlxlm/venv/bin/python -m pip show mlx-lm | grep -i '^Version:'
 ```
 
-Expect exactly one match (near line 1074). If empty, re-apply the patch before running any agent loop.
+Expect `Version: 0.31.3`. Older versions (0.29.1) required the retired A.1 venv patch — see `.mlxlm/PATCHES.md` if you need to roll back.
 
 ### 3. Launch OpenCode from the repository root
 
@@ -172,7 +158,7 @@ Keep Tab 1 visible while working in Tab 2 so server errors (`BatchRotatingKVCach
 Preflight checklist — run in order, do not skip:
 
 1. Server up: `.mlxlm/serve.sh status` shows a live PID and `/v1/models` returns JSON.
-2. A.1 patch present: `grep -n 'call_{uuid' ~/.mlxlm/venv/lib/python3.9/site-packages/mlx_lm/server.py` returns exactly one match.
+2. mlx-lm version correct: `~/.mlxlm/venv/bin/python -m pip show mlx-lm | grep -i '^Version:'` reports `Version: 0.31.3` (upstream `ToolCallFormatter` supplies the tool-call id natively).
 3. `cd` into the repository you want to work on and run `opencode` from that directory. OpenCode reads that repo's `opencode.json` and routes model calls to `http://127.0.0.1:8080/v1`.
 4. Working in a different repository? Copy this repo's `opencode.json` there first as a template (provider URL, default model, MCP wiring, context/output caps, `tool_output` caps).
 
@@ -229,7 +215,7 @@ Do not delegate `git commit` or `git push` to the model. Reject any edit you wou
 
 | Symptom | Root cause | Fix |
 | --- | --- | --- |
-| OpenCode aborts mid-stream: UnknownError: Expected 'id' to be a string. | A.1 patch missing (upstream returns tool_calls[].id: null) | Re-apply the A.1 patch (see setup step 3), restart the server |
+| OpenCode aborts mid-stream: UnknownError: Expected 'id' to be a string. | Running an old mlx-lm (<0.31.x) where `tool_calls[].id` is null | Upgrade the venv to mlx-lm 0.31.3 (upstream `ToolCallFormatter` supplies a non-null id); see setup step 3 |
 | Server 500 during normal use; log shows BatchRotatingKVCache.merge traceback | W4: concurrent requests with different prompt lengths crash the batch decoder | Confirm opencode.json has both agent.title.disable=true and agent.summary.disable=true (already set on origin/main) |
 | gpt-oss-20b selected → tool calls never fire, model emits `< | channel | >commentary` text |
 | P3 probe returns finish=length, output=1536 | Qwen3's <think> reasoning trace exceeds the 1536-token safety cap for this specific prompt | Expected — not a regression. Real MCP tool loops with normal prompts complete cleanly |
@@ -247,7 +233,7 @@ Concrete sequence to smoke-test the full stack:
 # Terminal 1 — start the server
 .mlxlm/serve.sh start
 .mlxlm/serve.sh status
-grep -n 'call_{uuid' ~/.mlxlm/venv/lib/python3.9/site-packages/mlx_lm/server.py
+~/.mlxlm/venv/bin/python -m pip show mlx-lm | grep -i '^Version:'
 
 # Terminal 2 — from repo root
 cd /path/to/local-large-language-models-management
@@ -256,7 +242,7 @@ opencode
 
 Inside OpenCode:
 
-> Use codebase-retrieval to locate the file that documents the A.1 venv patch, then quote the exact diff block that shows the null → uuid change.
+> Use codebase-retrieval to locate the file that documents the retired A.1 venv patch, and quote the retirement note that explains why the patch is no longer required on mlx-lm 0.31.3.
 
 Expected outcome:
 
@@ -272,7 +258,7 @@ If that succeeds, the local LLM + Augment Intent loop is proven working on your 
 
 - `STRATEGY.md` — architecture, safety baseline, failure-mode taxonomy, root-cause discipline.
 - `opencode.json` — authoritative for context/output caps, default model, W1 side-band disable, MCP wiring.
-- `.mlxlm/PATCHES.md` — A.1 patch details and reversal.
+- `.mlxlm/PATCHES.md` — retired A.1 patch: history, rationale, and rollback (via the preserved `~/.mlxlm/venv-py39-mlxlm0291.bak` venv).
 - `.mlxlm/mlxlm-serve.log` — server output (look for `BatchRotatingKVCache`, OOM, IOGPU errors).
 - `.mlxlm/probes/baseline_postmerge_20260824T001813/BASELINE.md` — the reference the current stack was validated against.
 - `.mlxlm/probes/upstream_bug_report.md` and `.mlxlm/probes/upstream_fr_tool_calls.md` — drafted reports for `ml-explore/mlx-lm`, pending upstream filing.
