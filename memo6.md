@@ -57,13 +57,13 @@ Its ToolCallFormatter contains logic equivalent to:
 tc_id = tc.pop("id", None) or str(uuid.uuid4())
 
 and subsequently constructs:
-
+```
 {
     "function": tc,
     "type": "function",
     "id": tc_id,
 }
-
+```
 For streaming responses it additionally supplies an index.
 
 Reference:
@@ -75,7 +75,7 @@ This is highly significant.
 It means current upstream MLX explicitly recognizes that a model/parser may produce a tool call without an ID and compensates for that at the OpenAI compatibility boundary. (GitHub)
 
 Therefore, under current upstream behaviour:
-
+```
 Qwen3 tool call
       │
       ▼
@@ -93,21 +93,21 @@ ToolCallFormatter
 OpenAI-compatible tool_call
       │
       └── id != null
-
+```
 This is almost exactly the behaviour required by OpenCode.
 
 Our observed id: null therefore requires explanation.
 
 ⸻
 
-3. Revised Root-Cause Hypothesis
+## 3. Revised Root-Cause Hypothesis
 
 Previously it was reasonable to suspect that Qwen3 simply failed to generate a field required by OpenCode.
 
 That is now too simplistic.
 
 A model-native tool call does not necessarily need to contain every piece of OpenAI protocol metadata. The compatibility server can normalize model-native output into the API contract expected by its client.
-
+```
 The likely failure is therefore somewhere in:
 
 Qwen3-Coder
@@ -129,14 +129,14 @@ SSE / OpenAI response
      │
      ▼
 OpenCode
-
+```
 The immediate question is:
 
 Is the version of mlx-lm actually used by MLXServe running the current ToolCallFormatter implementation?
 
 There are several plausible explanations.
 
-Hypothesis A — MLXServe contains an older mlx-lm
+### Hypothesis A — MLXServe contains an older mlx-lm
 
 The MLXServe installation may depend on a version of mlx-lm predating the missing-ID fix.
 
@@ -144,19 +144,19 @@ If so, upgrading the dependency may solve the problem without maintaining any cu
 
 This is the preferred outcome.
 
-Hypothesis B — MLXServe bypasses or modifies ToolCallFormatter
+### Hypothesis B — MLXServe bypasses or modifies ToolCallFormatter
 
 MLXServe may provide another OpenAI compatibility/streaming layer.
 
 In that case upstream mlx_lm.server could generate a valid ID but MLXServe could subsequently lose, replace or reconstruct the object.
 
-Hypothesis C — the streaming path behaves differently
+### Hypothesis C — the streaming path behaves differently
 
 The ID may exist in the non-streaming representation but be absent or malformed in one or more SSE deltas.
 
 Since OpenCode operates agentically and consumes streamed responses, this distinction matters.
 
-Hypothesis D — parser failure occurs before normalisation
+### Hypothesis D — parser failure occurs before normalisation
 
 There are known MLX issues where tool parsers reject otherwise meaningful model output. Current ToolCallFormatter catches parser errors and can discard the call rather than necessarily failing the HTTP request.
 
@@ -166,7 +166,7 @@ This tells us that ID normalization is important, but not sufficient. The entire
 
 ⸻
 
-4. What MLX Issue #607 Tells Us
+## 4. What MLX Issue #607 Tells Us
 
 Relevant upstream issue:
 
