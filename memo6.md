@@ -231,7 +231,7 @@ We therefore should not introduce Qwen-specific ID generation unless evidence sh
 
 ⸻
 
-6. OpenAI Aborted Tool-Call Discussion
+## 6. OpenAI Aborted Tool-Call Discussion
 
 Reference:
 
@@ -242,7 +242,7 @@ This discussion describes a different but related problem.
 A valid tool call can be persisted into conversation state, after which execution is interrupted before its corresponding tool result is recorded.
 
 This creates:
-
+```
 assistant
     │
     └── tool_call(id=A)
@@ -250,7 +250,7 @@ assistant
              X execution aborted
              │
              └── no tool result for A
-
+```
 Subsequent interaction may then fail because the conversation contains an orphaned tool call.
 
 The discussion describes race conditions around repairing that state, and a later contribution points to an openai-python issue covering stream cancellation and conversation state becoming inconsistent. (OpenAI Developer Community)
@@ -258,7 +258,7 @@ The discussion describes race conditions around repairing that state, and a late
 This is useful background, but it should not be treated as the primary fix for our problem.
 
 Our failure occurs earlier:
-
+```
 Qwen3
   │
   ▼
@@ -272,7 +272,7 @@ tool_call
            ▼
         OpenCode
            X
-
+```
 Trying to repair conversation state after this would treat a symptom rather than fixing the protocol boundary.
 
 The OpenAI discussion does, however, reinforce an important design requirement:
@@ -281,12 +281,12 @@ Tool-call identity must be valid and stable throughout the complete tool-call li
 
 ⸻
 
-7. Required Compatibility Contract
+## 7. Required Compatibility Contract
 
 We should define the MLXServe/OpenCode boundary explicitly.
 
 A tool call leaving our local inference server should satisfy at least:
-
+```
 tool_call
 ├── id
 │   └── non-null and stable
@@ -301,9 +301,9 @@ tool_call
 │
 └── index
     └── correct when streaming
-
+```
 The same ID must remain associated with the call during:
-
+```
 tool-call stream
        │
        ▼
@@ -316,15 +316,15 @@ tool execution
 tool result
        │
        └── tool_call_id = original ID
-
+```
 We should think of this as an invariant rather than an implementation detail.
 
 ⸻
 
-8. Desired Architecture
+## 8. Desired Architecture
 
 The preferred architecture is:
-
+```
 ┌──────────────────────────────┐
 │ Qwen3-Coder                  │
 │                              │
@@ -363,36 +363,36 @@ The preferred architecture is:
 ┌──────────────────────────────┐
 │ OpenCode                     │
 └──────────────────────────────┘
-
+```
 The protocol normalizer should ideally be upstream mlx_lm.server, rather than software maintained by us.
 
 ⸻
 
-9. Strategy
+## 9. Strategy
 
 We should pursue the following options in order.
 
-Strategy 1 — Upgrade, Don’t Patch
+### Strategy 1 — Upgrade, Don’t Patch
 
 Preferred strategy.
 
 Determine exactly which versions are running:
-
+```
 python - <<'PY'
 import mlx_lm
 print(mlx_lm.__version__)
 PY
-
+```
 Also identify the MLXServe version and its dependency declaration for mlx-lm.
 
 Then inspect the actual installed formatter:
-
+```
 python - <<'PY'
 import inspect
 import mlx_lm.server
 print(inspect.getsource(mlx_lm.server.ToolCallFormatter))
 PY
-
+```
 We specifically want to determine whether it contains:
 
 tc_id = tc.pop("id", None) or str(uuid.uuid4())
@@ -404,7 +404,7 @@ If a supported upgrade gives us the current implementation, upgrade and retest b
 Success condition
 
 A streamed Qwen3-Coder tool call reaches OpenCode with:
-
+```
 {
   "id": "<non-null-value>",
   "type": "function",
@@ -413,12 +413,12 @@ A streamed Qwen3-Coder tool call reaches OpenCode with:
     "arguments": "..."
   }
 }
-
+```
 and OpenCode successfully executes the tool and continues the agent turn.
 
 ⸻
 
-10. Strategy 2 — Determine Exactly Where the ID Disappears
+## 10. Strategy 2 — Determine Exactly Where the ID Disappears
 
 If the installed ToolCallFormatter already generates IDs, instrument the pipeline.
 
@@ -432,33 +432,33 @@ Capture the tool call at four points:
 This gives us a simple fault-isolation test.
 
 If:
-
+```
 parser            id = None
 formatter         id = UUID
 HTTP/SSE          id = UUID
 OpenCode          id = UUID
-
+```
 the ID problem is solved and another tool-calling incompatibility is responsible.
 
 If:
-
+```
 formatter         id = UUID
 HTTP/SSE          id = null
-
+```
 the problem is in MLXServe’s serialization/streaming layer.
 
 If:
-
+```
 HTTP/SSE          id = UUID
 OpenCode          id = null
-
+```
 investigate OpenCode.
 
 We should only patch the component where the information is actually lost.
 
 ⸻
 
-11. Strategy 3 — Minimal MLX Compatibility Patch
+## 11. Strategy 3 — Minimal MLX Compatibility Patch
 
 If upgrading is impossible and the installed formatter does not provide an ID, introduce the smallest possible patch at the MLX compatibility boundary.
 
@@ -469,29 +469,29 @@ tc_id = tc.pop("id", None) or str(uuid.uuid4())
 The critical requirement is that the generated ID is created once per logical tool call, not independently for every streamed chunk.
 
 Incorrect:
-
+```
 delta 1 → UUID A
 delta 2 → UUID B
 delta 3 → UUID C
-
+```
 Correct:
-
+```
 logical tool call → UUID A
 delta 1 → A
 delta 2 → A
 delta 3 → A
 tool result → A
-
+```
 We should keep such a patch small enough that it can later be removed when MLXServe incorporates the relevant upstream behaviour.
 
 ⸻
 
-12. Strategy 4 — Compatibility Proxy
+## 12. Strategy 4 — Compatibility Proxy
 
 Only introduce a proxy if MLXServe cannot be corrected cleanly.
 
 The architecture would become:
-
+```
 OpenCode
    │
    ▼
@@ -509,7 +509,7 @@ MLXServe
    │
    ▼
 Qwen3-Coder
-
+```
 This has one strategic advantage: it could normalize multiple local model families.
 
 However, it also adds:
@@ -528,20 +528,20 @@ A proxy becomes attractive only if we discover a broader and recurring incompati
 
 ⸻
 
-13. Do Not Patch OpenCode First
+## 13. Do Not Patch OpenCode First
 
 OpenCode is correctly useful to us precisely because it can consume an OpenAI-compatible endpoint.
 
 Making OpenCode tolerate malformed responses would invert responsibility:
-
+```
 Bad:
 server violates contract
         │
         ▼
 every client compensates
-
+```
 versus:
-
+```
 Preferred:
 model-native output
         │
@@ -550,19 +550,19 @@ server normalizes
         │
         ▼
 standards-compatible clients
-
+```
 We want the latter.
 
 This also means other OpenAI-compatible clients can subsequently use the same local endpoint.
 
 ⸻
 
-14. Test Harness
+## 14. Test Harness
 
 Before declaring the problem solved, create a minimal repeatable interoperability test.
 
 It should define a harmless tool such as:
-
+```
 {
   "type": "function",
   "function": {
@@ -574,7 +574,7 @@ It should define a harmless tool such as:
     }
   }
 }
-
+```
 Ask Qwen3-Coder something that unambiguously requires the tool.
 
 Test both:
@@ -603,12 +603,12 @@ The streaming test is especially important because a non-streaming success does 
 
 ⸻
 
-15. Add Protocol Regression Tests
+## 15. Add Protocol Regression Tests
 
 Once fixed, capture the failure as a regression test.
 
 At minimum test:
-
+```
 tool call without model-generated ID
 tool call with model-generated ID
 single tool call
@@ -621,7 +621,7 @@ parser rejection
 aborted generation
 tool execution failure
 follow-up turn containing tool result
-
+```
 A particularly important assertion is:
 
 assert tool_call["id"] is not None
@@ -634,7 +634,7 @@ This turns the current debugging exercise into a permanent compatibility guarant
 
 ⸻
 
-16. Broader Lesson from Recent MLX Issues
+## 16. Broader Lesson from Recent MLX Issues
 
 Recent MLX reports show that tool calling remains an active interoperability area.
 
@@ -660,10 +660,10 @@ Agentic protocol compatibility
 
 ⸻
 
-17. Recommended Immediate Work
+## 17. Recommended Immediate Work
 
 Proceed in this order:
-
+```
 1. Record MLXServe version
           │
           ▼
@@ -702,12 +702,12 @@ Proceed in this order:
                 │
                 ▼
              retest
-
+```
 Only if that fails should we consider an independent compatibility proxy.
 
 ⸻
 
-18. Decision
+## 18. Decision
 
 Our working decision is:
 
@@ -725,7 +725,7 @@ Specifically:
 
 ⸻
 
-19. References
+## 19. References
 
 Primary
 
@@ -753,7 +753,7 @@ Additional evidence
 
 ⸻
 
-20. Target Outcome
+## 20. Target Outcome
 
 The target is not merely to make one OpenCode command succeed.
 
