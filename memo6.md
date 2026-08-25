@@ -758,7 +758,7 @@ Additional evidence
 The target is not merely to make one OpenCode command succeed.
 
 The target is:
-
+```
                     LOCAL AGENT STACK
               ┌────────────────────┐
               │      OpenCode      │
@@ -778,7 +778,7 @@ The target is:
               │   Qwen3-Coder      │
               │  Local inference   │
               └────────────────────┘
-
+```
 Once this boundary is reliable, OpenCode should be able to perform local agentic coding with Qwen3-Coder without depending on cloud inference merely because of tool-protocol incompatibilities.
 
 That is the appropriate foundation for the Local LLMs project: local inference behind a well-tested OpenAI-compatible agent interface, rather than client-specific workarounds.
