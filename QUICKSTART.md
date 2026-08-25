@@ -162,8 +162,8 @@ Day-to-day coding from Warp uses two terminal tabs and one focused OpenCode sess
 
 | Tab | Working directory | Purpose | Commands |
 | --- | --- | --- | --- |
-| 1 | anywhere | `mlx-lm.server` control | `.mlxlm/serve.sh start` / `status` / `stop`; `tail -f .mlxlm/mlxlm-serve.log` |
-| 2 | repository root | OpenCode agent loop | `opencode` |
+| 1 | anywhere | mlx-lm.server control | .mlxlm/serve.sh start / status / stop; tail -f .mlxlm/mlxlm-serve.log |
+| 2 | repository root | OpenCode agent loop | opencode |
 
 Keep Tab 1 visible while working in Tab 2 so server errors (`BatchRotatingKVCache`, OOM, IOGPU) surface immediately in the log.
 
@@ -182,15 +182,15 @@ The context budget is **16,384 tokens with a ~1,536-token output cap** (per-mode
 
 Grounded exploration via the `augment-context-engine` MCP tool:
 
-> Use codebase-retrieval to find where `<symbol or behavior>` is defined in this repo. Quote the file and the exact lines. Do not summarize other files.
+> Use codebase-retrieval to find where <symbol or behavior> is defined in this repo. Quote the file and the exact lines. Do not summarize other files.
 
 A small scoped edit:
 
-> Modify function `<X>` in `<path/to/file>` to `<Z>`. Show the diff only. Do not touch other files.
+> Modify function <X> in <path/to/file> to <Z>. Show the diff only. Do not touch other files.
 
 Running tests or commands via OpenCode's built-in terminal tool:
 
-> Run `<tests|lint|build command>` from the repo root and report only the failing lines.
+> Run <tests|lint|build command> from the repo root and report only the failing lines.
 
 Keep retrieval payloads focused and let compaction do its job (`compaction.auto=true` in `opencode.json`).
 
@@ -200,7 +200,7 @@ Follows STRATEGY.md's session lifecycle. React early — do not push through amb
 
 | State | Signals | Action |
 | --- | --- | --- |
-| Green | Requests complete normally; no GPU-memory warnings; no `BatchRotatingKVCache` traceback in the log | Continue |
+| Green | Requests complete normally; no GPU-memory warnings; no BatchRotatingKVCache traceback in the log | Continue |
 | Amber | Repeated retrieval dominates history; context approaches 16K; compaction fires repeatedly; GPU gate starts rejecting reasonable requests | Preserve conclusions to notes, end the OpenCode session, restart it from a clean context; restart the server between heavy sessions |
 | Red | GPU stall, server hang, severe memory pressure, IOGPU/Metal errors, abnormal process termination, kernel panic | Stop immediately. Capture the log. Do not reproduce the workload. |
 
@@ -222,8 +222,8 @@ Do not delegate `git commit` or `git push` to the model. Reject any edit you wou
 ### What NOT to do
 
 - **Do not paste large files into the prompt.** Tool output is already capped at 200 lines / 16 KB (`tool_output` in `opencode.json`); manual pastes bypass that cap and blow the context.
-- **Do not run parallel OpenCode sessions against a single `mlx-lm.server`.** Concurrent requests with different prompt lengths trigger the W4 `BatchRotatingKVCache.merge` crash. The `agent.title.disable` / `agent.summary.disable` settings in `opencode.json` serialize one session's own traffic; they do not protect against a second client.
-- **Do not use `gpt-oss-20b` for tool-calling work.** `mlx_lm.server` does not parse its Harmony `commentary` channel into structured `tool_calls[]`, so MCP tool loops never fire. Keep the default `Qwen3-8B-4bit`.
+- **Do not run parallel OpenCode sessions against a single **`mlx-lm.server`**.** Concurrent requests with different prompt lengths trigger the W4 `BatchRotatingKVCache.merge` crash. The `agent.title.disable` / `agent.summary.disable` settings in `opencode.json` serialize one session's own traffic; they do not protect against a second client.
+- **Do not use **`gpt-oss-20b`** for tool-calling work.** `mlx_lm.server` does not parse its Harmony `commentary` channel into structured `tool_calls[]`, so MCP tool loops never fire. Keep the default `Qwen3-8B-4bit`.
 
 ## Known errors and their resolution
 
