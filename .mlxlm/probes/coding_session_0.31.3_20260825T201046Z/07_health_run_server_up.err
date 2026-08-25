@@ -1,0 +1,8 @@
+.mlxlm/health.sh: line 31: local: can only be used in a function
+.mlxlm/health.sh: line 32: PID: unbound variable
+.mlxlm/health.sh: line 32: local: can only be used in a function
+.mlxlm/health.sh: line 33: RSS: unbound variable
+.mlxlm/health.sh: line 33: local: can only be used in a function
+.mlxlm/health.sh: line 34: local: can only be used in a function
+.mlxlm/health.sh: line 35: GiB: unbound variable
+.mlxlm/health.sh: line 38: CAP_GB: unbound variable

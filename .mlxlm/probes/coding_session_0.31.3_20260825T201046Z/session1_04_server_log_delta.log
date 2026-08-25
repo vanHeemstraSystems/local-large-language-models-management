@@ -1,0 +1,14 @@
+127.0.0.1 - - [25/Aug/2026 22:11:05] "GET /v1/models HTTP/1.1" 200 -
+2026-08-25 22:11:55,354 - INFO - Prompt Cache: 0 sequences, 0.00 GB
+2026-08-25 22:11:55,355 - INFO - - assistant: 0 sequences, 0.00 GB
+2026-08-25 22:11:55,355 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 22:11:55,355 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 22:11:55] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 22:12:08,273 - INFO - Prompt processing progress: 2048/8648
+2026-08-25 22:12:13,173 - INFO - Prompt processing progress: 4096/8648
+2026-08-25 22:12:18,429 - INFO - Prompt processing progress: 6144/8648
+2026-08-25 22:12:24,059 - INFO - Prompt processing progress: 8192/8648
+2026-08-25 22:12:24,469 - INFO - Prompt processing progress: 8315/8648
+2026-08-25 22:12:25,508 - INFO - Prompt processing progress: 8647/8648
+2026-08-25 22:12:25,573 - INFO - Prompt processing progress: 8648/8648
+2026-08-25 22:13:11,258 - WARNING - Failed to parse tool call (JSONDecodeError: Unterminated string starting at: line 1 column 44 (char 43)) — tool text was likely truncated mid-generation.

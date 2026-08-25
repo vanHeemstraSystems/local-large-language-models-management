@@ -1,0 +1,44 @@
+127.0.0.1 - - [25/Aug/2026 22:11:05] "GET /v1/models HTTP/1.1" 200 -
+2026-08-25 22:11:55,354 - INFO - Prompt Cache: 0 sequences, 0.00 GB
+2026-08-25 22:11:55,355 - INFO - - assistant: 0 sequences, 0.00 GB
+2026-08-25 22:11:55,355 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 22:11:55,355 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 22:11:55] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 22:12:08,273 - INFO - Prompt processing progress: 2048/8648
+2026-08-25 22:12:13,173 - INFO - Prompt processing progress: 4096/8648
+2026-08-25 22:12:18,429 - INFO - Prompt processing progress: 6144/8648
+2026-08-25 22:12:24,059 - INFO - Prompt processing progress: 8192/8648
+2026-08-25 22:12:24,469 - INFO - Prompt processing progress: 8315/8648
+2026-08-25 22:12:25,508 - INFO - Prompt processing progress: 8647/8648
+2026-08-25 22:12:25,573 - INFO - Prompt processing progress: 8648/8648
+2026-08-25 22:13:11,258 - WARNING - Failed to parse tool call (JSONDecodeError: Unterminated string starting at: line 1 column 44 (char 43)) — tool text was likely truncated mid-generation.
+2026-08-25 22:14:40,745 - INFO - Prompt Cache: 1 sequences, 1.50 GB
+2026-08-25 22:14:40,745 - INFO - - assistant: 1 sequences, 1.50 GB
+2026-08-25 22:14:40,745 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 22:14:40,745 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 22:14:40] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 22:14:41,945 - INFO - Prompt processing progress: 344/345
+2026-08-25 22:14:41,999 - INFO - Prompt processing progress: 345/345
+2026-08-25 22:15:01,101 - WARNING - Failed to parse tool call (JSONDecodeError: Expecting ',' delimiter: line 1 column 385 (char 384)) — tool text was likely truncated mid-generation.
+2026-08-25 22:15:01,254 - INFO - Prompt Cache: 2 sequences, 2.88 GB
+2026-08-25 22:15:01,254 - INFO - - assistant: 2 sequences, 2.88 GB
+2026-08-25 22:15:01,254 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 22:15:01,254 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 22:15:01] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 22:15:01,577 - INFO - Prompt processing progress: 4/5
+2026-08-25 22:15:01,626 - INFO - Prompt processing progress: 5/5
+2026-08-25 22:15:11,349 - WARNING - Failed to parse tool call (JSONDecodeError: Expecting ',' delimiter: line 1 column 385 (char 384)) — tool text was likely truncated mid-generation.
+2026-08-25 22:15:11,496 - INFO - Prompt Cache: 3 sequences, 4.25 GB
+2026-08-25 22:15:11,496 - INFO - - assistant: 3 sequences, 4.25 GB
+2026-08-25 22:15:11,496 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 22:15:11,496 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 22:15:11] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 22:15:11,686 - INFO - Prompt processing progress: 7/8
+2026-08-25 22:15:11,740 - INFO - Prompt processing progress: 8/8
+2026-08-25 22:15:25,096 - INFO - Prompt Cache: 4 sequences, 5.64 GB
+2026-08-25 22:15:25,096 - INFO - - assistant: 4 sequences, 5.64 GB
+2026-08-25 22:15:25,096 - INFO - - user: 0 sequences, 0.00 GB
+2026-08-25 22:15:25,096 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [25/Aug/2026 22:15:25] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-08-25 22:15:26,751 - INFO - Prompt processing progress: 463/464
+2026-08-25 22:15:26,804 - INFO - Prompt processing progress: 464/464

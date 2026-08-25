@@ -1,0 +1,31 @@
+=== date ===
+2026-08-25T20:10:51Z
+=== pip show mlx-lm ===
+Name: mlx-lm
+Version: 0.31.3
+Summary: LLMs with MLX and the Hugging Face Hub
+Home-page: https://github.com/ml-explore/mlx-lm
+Author: MLX Contributors
+Author-email: mlx@group.apple.com
+License: MIT
+Location: /Users/willemvanheemstra/.mlxlm/venv/lib/python3.12/site-packages
+Requires: jinja2, mlx, numpy, protobuf, pyyaml, sentencepiece, transformers
+Required-by: 
+=== python ===
+Python 3.12.13
+=== opencode --version ===
+1.18.18
+=== serve.sh status (before start) ===
+not running
+
+--- /v1/models ---
+curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Couldn't connect to server
+
+=== serve.sh status (after start) ===
+  PID    RSS COMMAND
+35020 3203840 /opt/homebrew/Cellar/python@3.12/3.12.13/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -m mlx_lm server --host 127.0.0.1 --port 8080 --model /Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8
+
+--- /v1/models ---
+{"object": "list", "data": [{"id": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/gpt-oss-20b-MXFP4-Q8", "object": "model", "created": 1787688665}]}
+=== baseline_log_lines ===
+     148

@@ -1,0 +1,20 @@
+Session 1 exited cleanly (opencode exit_code=0, elapsed 83 s) but produced NO
+final assistant text and NO tool call was executed. The server log delta
+contains the diagnostic:
+
+    WARNING - Failed to parse tool call (JSONDecodeError: Unterminated string
+    starting at: line 1 column 44 (char 43)) - tool text was likely truncated
+    mid-generation.
+
+Interpretation: Qwen3-8B-4bit began emitting a write tool call but hit the
+per-response output cap (opencode.json sets output=1536 for this model)
+while still in the middle of the JSON content string, so mlx-lm returned a
+malformed tool_calls[] which OpenCode dropped. The stack itself did not error
+(no UnknownError, no traceback); this is a token-budget issue for a ~60-line
+script emitted inside a JSON string.
+
+Follow-up plan (session 2): re-run with a tighter, shorter prompt that
+- asks for a script of ~25 lines,
+- forbids reasoning output before the tool call,
+- restates the write path explicitly.
+This is the one allowed fix-up session under the task's rules.
