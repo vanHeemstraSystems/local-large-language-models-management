@@ -27,4 +27,9 @@ That tells Warp to recognize `opencode` as a third-party CLI agent and render it
 - If you want zero chance of accidentally invoking Warp's cloud AI while doing local-only work, you could set `is_any_ai_enabled = false` under `[agents.warp_agent]` and `nld_in_terminal_enabled = false` under `[agents.warp_agent.input]`. That's a preference, not a requirement — the two systems don't interfere.
 - Note that the `[agents.execution_profiles.default]` denylist (no `curl`, `bash`, `rm`, etc.) applies to **Warp Agent's** command execution, not to what you or OpenCode run in a plain terminal tab. Your preflight `curl` checks and `serve.sh` work unaffected.
 
-So the answer to "what do I do": nothing in Warp. Tab 1 `.mlxlm/serve.sh start`, Tab 2 `opencode` from the repo root — you're already fully configured.
+So the answer to "what do I do": nothing in Warp.
+
+In Warp, navigate to the local respository for the `local-large-language-models-management` (at ~/intent/workspaces/favourite-coyote/local-large-language-models-management/), then:
+
+- Tab 1 `.mlxlm/serve.sh start`.
+- Tab 2 `opencode` from the repo root — you're already fully configured.
