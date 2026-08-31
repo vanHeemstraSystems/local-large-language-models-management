@@ -2,17 +2,19 @@
 set -u
 
 # Check 1: Python and mlx-lm versions
-if ~/.mlxlm/venv/bin/python --version &> /dev/null; then
-  echo "[OK] Python version check passed"
+PY_VERSION=$(~/.mlxlm/venv/bin/python --version 2>&1)
+if [ -n "$PY_VERSION" ]; then
+  echo "[OK] Python version: $PY_VERSION"
 else
   echo "[FAIL] Python version check failed"
   exit 1
 fi
 
-if ~/.mlxlm/venv/bin/pip show mlx-lm | awk '/^Version:/{print $2}' &> /dev/null; then
-  echo "[OK] mlx-lm version check passed"
+MLXLM_VERSION=$(~/.mlxlm/venv/bin/pip show mlx-lm 2>/dev/null | awk '/^Version:/{print $2}')
+if [ "$MLXLM_VERSION" = "0.31.3" ]; then
+  echo "[OK] mlx-lm version: $MLXLM_VERSION"
 else
-  echo "[FAIL] mlx-lm version check failed"
+  echo "[FAIL] mlx-lm version: ${MLXLM_VERSION:-unknown} (expected 0.31.3)"
   exit 1
 fi
 
@@ -28,14 +30,14 @@ fi
 if ! pgrep -f mlx_lm.server &> /dev/null; then
   echo "[OK] Server not running (RSS check skipped)"
 else
-  local PID=$(pgrep -f mlx_lm.server | head -n 1)
-  local RSS=$(ps -o rss= -p $PID)
-  local GiB=$(echo "scale=2; $RSS / 1024 / 1024" | bc)
-  local CAP_GB=18
+  PID=$(pgrep -f mlx_lm.server | head -n 1)
+  RSS=$(ps -o rss= -p "$PID")
+  GiB=$(awk -v r="$RSS" 'BEGIN{printf "%.2f", r/1024/1024}')
+  CAP_GB=18
   if (( $(echo "$GiB < $CAP_GB" | bc -l) )); then
-    echo "[OK] Server RSS under $CAP_GB GB"
+    echo "[OK] Server RSS ${GiB} GiB under ${CAP_GB} GB cap"
   else
-    echo "[FAIL] Server RSS over $CAP_GB GB"
+    echo "[FAIL] Server RSS ${GiB} GiB over ${CAP_GB} GB cap"
     exit 1
   fi
 fi
