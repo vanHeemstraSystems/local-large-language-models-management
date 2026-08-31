@@ -154,6 +154,15 @@ Day-to-day coding from Warp uses two terminal tabs and one focused OpenCode sess
 
 Keep Tab 1 visible while working in Tab 2 so server errors (`BatchRotatingKVCache`, OOM, IOGPU) surface immediately in the log.
 
+### Two `.mlxlm/` directories
+
+Two distinct locations share the name — commands in this guide assume the second:
+
+- `~/.mlxlm/` (home) — holds ONLY the mlx-lm venv (Python 3.12 + mlx-lm 0.31.3) at `~/.mlxlm/venv/`.
+- `<repo>/.mlxlm/` (this repo) — tooling and evidence: `serve.sh`, `health.sh`, `PATCHES.md`, `probes/`, and disk-only `mlxlm-serve.log`.
+
+All `serve.sh` and `health.sh` invocations run from the **repository root** (for example `.mlxlm/serve.sh start`). One-command preflight: `bash .mlxlm/health.sh` — checks the venv versions, `/v1/models`, and server RSS against the 18 GB safety cap.
+
 ### Starting a coding session
 
 Preflight checklist — run in order, do not skip:
