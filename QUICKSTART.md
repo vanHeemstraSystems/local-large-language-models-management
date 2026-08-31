@@ -49,6 +49,7 @@ Chat sessions started against an Auggie specialist (Coordinator, Implementor, PR
 
 - The public docs describe BYOA at Space creation but do not document a settings-panel path for switching provider on an *existing* Space. If Intent does not expose that toggle, create a fresh Space.
 - Some Intent side-band agents (workspace title/summary generators, review helpers) may always call Augment-hosted models. Confirm from the credit dashboard rather than assumption.
+
 ## One-time setup
 
 ### 1. Create the mlx-lm venv
@@ -215,7 +216,7 @@ Do not delegate `git commit` or `git push` to the model. Reject any edit you wou
 
 | Symptom | Root cause | Fix |
 | --- | --- | --- |
-| OpenCode aborts mid-stream: UnknownError: Expected 'id' to be a string. | Running an old mlx-lm (<0.31.x) where `tool_calls[].id` is null | Upgrade the venv to mlx-lm 0.31.3 (upstream `ToolCallFormatter` supplies a non-null id); see setup step 3 |
+| OpenCode aborts mid-stream: UnknownError: Expected 'id' to be a string. | Running an old mlx-lm (<0.31.x) where tool_calls[].id is null | Upgrade the venv to mlx-lm 0.31.3 (upstream ToolCallFormatter supplies a non-null id); see setup step 3 |
 | Server 500 during normal use; log shows BatchRotatingKVCache.merge traceback | W4: concurrent requests with different prompt lengths crash the batch decoder | Confirm opencode.json has both agent.title.disable=true and agent.summary.disable=true (already set on origin/main) |
 | gpt-oss-20b selected → tool calls never fire, model emits `< | channel | >commentary` text |
 | P3 probe returns finish=length, output=1536 | Qwen3's <think> reasoning trace exceeds the 1536-token safety cap for this specific prompt | Expected — not a regression. Real MCP tool loops with normal prompts complete cleanly |
