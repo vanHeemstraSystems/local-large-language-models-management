@@ -1,0 +1,6 @@
+stopped: pid=35020
+not running
+
+--- /v1/models ---
+curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Couldn't connect to server
+

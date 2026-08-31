@@ -1,0 +1,17 @@
+Command: opencode run --auto --pure -m "mlxlm//Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit" "<coding prompt in session2_prompt.txt>"
+CWD: /Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management
+
+PROMPT:
+Use the write tool to create a new file at path `.mlxlm/health.sh`.
+
+Do NOT write any thinking or explanation before or after the tool call.
+Just call the write tool exactly once and stop.
+
+The file MUST be a compact bash script (about 25-30 lines, no more than 40) that:
+- Starts with `#!/usr/bin/env bash` and `set -u`.
+- Check 1: prints the Python and mlx-lm versions from `~/.mlxlm/venv`, using `~/.mlxlm/venv/bin/python --version` and `~/.mlxlm/venv/bin/pip show mlx-lm | awk '/^Version:/{print $2}'`. Emit `[OK]` if both succeed, `[FAIL]` otherwise.
+- Check 2: `curl -sS -m 3 http://127.0.0.1:8080/v1/models` — `[OK]` if it prints JSON containing `"data"`, else `[FAIL]`.
+- Check 3: find a running `mlx_lm.server` via `pgrep -f mlx_lm.server`; if none, emit `[OK] server not running (RSS check skipped)`. If running, read `ps -o rss= -p $PID` (kB), convert to GiB with two decimals, compare against a `CAP_GB=18` cap. `[OK]` if under cap, `[FAIL]` if over.
+- Exit 0 only when every emitted line starts with `[OK]`; otherwise exit 1.
+
+Write only the file. No other output.

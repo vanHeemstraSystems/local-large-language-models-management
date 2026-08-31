@@ -14,18 +14,18 @@ Verified on Apple M4 Pro · 14 cores · 24 GiB · macOS 26.5.2 (arm64).
 
 ## Start here
 
-- **[QUICKSTART.md](QUICKSTART.md)** — step-by-step operator guide: prerequisites, venv setup, daily workflow, known errors, an end-to-end example, and the Intent BYOA billing/credits guide.
-- **[STRATEGY.md](STRATEGY.md)** — the *why*: safety principles, maturity criteria, tuning discipline, failure interpretation.
+- [**QUICKSTART.md**](QUICKSTART.md) — step-by-step operator guide: prerequisites, venv setup, daily workflow, known errors, an end-to-end example, and the Intent BYOA billing/credits guide.
+- [**STRATEGY.md**](STRATEGY.md) — the *why*: safety principles, maturity criteria, tuning discipline, failure interpretation.
 
 ## Authoritative files
 
 | File | Authoritative for |
-|---|---|
-| `opencode.json` | Provider endpoint, default model, `context 16384` / `max_output_tokens 1536`, MCP wiring, compaction, tool-output caps, side-band agent settings (W1 workaround). |
-| `.mlxlm/PATCHES.md` | Retired **A.1 venv patch** history and rollback recipe. On mlx-lm 0.31.3 the upstream `ToolCallFormatter` supplies OpenAI-spec-compliant `tool_calls[].id` values natively, so no patch is applied on the current stack. |
-| `.mlxlm/serve.sh` | Lifecycle wrapper (`start` / `stop` / `status` / `log`) for `mlx-lm.server` in `~/.mlxlm/venv`. |
-| `STRATEGY.md` | Operating principles and safety baseline (18 GB resident cap, 16,384 ctx, 1,536 max tokens, 4-bit KV). |
-| `QUICKSTART.md` | Operator workflow, verification steps, known errors, Intent BYOA setup. |
+| --- | --- |
+| opencode.json | Provider endpoint, default model, context 16384 / max_output_tokens 1536, MCP wiring, compaction, tool-output caps, side-band agent settings (W1 workaround). |
+| .mlxlm/PATCHES.md | Retired A.1 venv patch history and rollback recipe. On mlx-lm 0.31.3 the upstream ToolCallFormatter supplies OpenAI-spec-compliant tool_calls[].id values natively, so no patch is applied on the current stack. |
+| .mlxlm/serve.sh | Lifecycle wrapper (start / stop / status / log) for mlx-lm.server in ~/.mlxlm/venv. |
+| STRATEGY.md | Operating principles and safety baseline (18 GB resident cap, 16,384 ctx, 1,536 max tokens, 4-bit KV). |
+| QUICKSTART.md | Operator workflow, verification steps, known errors, Intent BYOA setup. |
 
 If any documentation disagrees with `opencode.json` or `.mlxlm/PATCHES.md`, the runtime configuration is authoritative and the documentation must be corrected.
 
@@ -37,7 +37,7 @@ If any documentation disagrees with `opencode.json` or `.mlxlm/PATCHES.md`, the 
 - `opencode.json` — OpenCode workspace configuration that wires the agent loop to the local endpoint and the Augment Context Engine MCP.
 - `QUICKSTART.md`, `STRATEGY.md` — see above.
 - `archive/memo1.md`, `archive/memo2.md`, `archive/memo3.md` — background rationale (hardware, model choice, runtime selection). Not required to operate the stack.
-- `scripts/mlxserve.sh`, `scripts/client_smoke.py`, `.mlxserve/` — **legacy** artifacts from the pre-migration `mlx-serve` stack. Retained for historical reference; see the *Legacy `mlx-serve` stack* appendix below.
+- `scripts/mlxserve.sh`, `scripts/client_smoke.py`, `.mlxserve/` — **legacy** artifacts from the pre-migration `mlx-serve` stack. Retained for historical reference; see the *Legacy *`mlx-serve`* stack* appendix below.
 
 ## Prerequisites
 
@@ -74,15 +74,15 @@ Runtime defaults are set in `opencode.json` and enforced client-side:
 
 | Setting | Value | Source |
 | --- | --- | --- |
-| Endpoint | `http://127.0.0.1:8080/v1` | `opencode.json` → `provider.mlxlm.options.baseURL` |
-| Default model | `Qwen3-8B-4bit` (local path) | `opencode.json` → top-level `model` |
-| Alternate model | `gpt-oss-20b-MXFP4-Q8` | `opencode.json` → `provider.mlxlm.models` |
-| Context cap | 16,384 tokens | `provider.mlxlm.models.*.limit.context` |
-| Max output | 1,536 tokens | `provider.mlxlm.models.*.limit.output` |
-| Auto-compaction | enabled (`reserved: 5000`, `preserve_recent_tokens: 4000`) | `compaction.*` |
-| Tool-output cap | `max_lines: 200`, `max_bytes: 16384` | `tool_output.*` |
-| Side-band agents | `title` / `summary` disabled (W1 workaround) | `agent.*` |
-| Augment Context Engine | wired via MCP (`auggie --mcp`) | `mcp.augment-context-engine` |
+| Endpoint | http://127.0.0.1:8080/v1 | opencode.json → provider.mlxlm.options.baseURL |
+| Default model | Qwen3-8B-4bit (local path) | opencode.json → top-level model |
+| Alternate model | gpt-oss-20b-MXFP4-Q8 | opencode.json → provider.mlxlm.models |
+| Context cap | 16,384 tokens | provider.mlxlm.models.*.limit.context |
+| Max output | 1,536 tokens | provider.mlxlm.models.*.limit.output |
+| Auto-compaction | enabled (reserved: 5000, preserve_recent_tokens: 4000) | compaction.* |
+| Tool-output cap | max_lines: 200, max_bytes: 16384 | tool_output.* |
+| Side-band agents | title / summary disabled (W1 workaround) | agent.* |
+| Augment Context Engine | wired via MCP (auggie --mcp) | mcp.augment-context-engine |
 
 The `mlx-lm.server` CLI itself does not expose resident-memory, ctx-size, KV-quantisation, prefill-chunk, or PLD toggles. Those constraints now live entirely in `opencode.json` and in operator discipline (see `STRATEGY.md`).
 
@@ -92,8 +92,8 @@ The Intent by Augment desktop app supports **Bring Your Own Agent**. Create a ne
 
 | Component | Costs Augment credits? |
 | --- | --- |
-| Local model inference via OpenCode + mlx-lm | No — traffic stays on `127.0.0.1` |
-| Augment Context Engine (`auggie --mcp`) | Yes — per retrieval call |
+| Local model inference via OpenCode + mlx-lm | No — traffic stays on 127.0.0.1 |
+| Augment Context Engine (auggie --mcp) | Yes — per retrieval call |
 | Intent orchestration (spec, worktrees, PR flow) | No separate charge |
 | Auggie native agents (Coordinator / Implementor / Verifier) | Yes — same rate as the Auggie CLI |
 
@@ -111,7 +111,7 @@ Safety baseline enforced by `opencode.json` on the current stack:
 - Auto-compaction reserves 5,000 tokens and preserves the most recent 4,000 tokens.
 - Retrieval payloads capped at 200 lines / 16,384 bytes to keep the budget spendable.
 
-Historical measurements from the pre-migration `mlx-serve` + Qwen3-Coder-30B stack (context budget, failure-mode ladder, memory-envelope numbers) are preserved in the *Legacy `mlx-serve` stack* appendix below. They describe a different runtime and a different (much larger) model, so the specific numbers do not directly apply to the current `mlx-lm.server` + Qwen3-8B-4bit stack — but the layered failure model and the *do-not* list they document remain useful guidance.
+Historical measurements from the pre-migration `mlx-serve` + Qwen3-Coder-30B stack (context budget, failure-mode ladder, memory-envelope numbers) are preserved in the *Legacy *`mlx-serve`* stack* appendix below. They describe a different runtime and a different (much larger) model, so the specific numbers do not directly apply to the current `mlx-lm.server` + Qwen3-8B-4bit stack — but the layered failure model and the *do-not* list they document remain useful guidance.
 
 ## Fallback path
 
@@ -121,14 +121,12 @@ Both models must be downloaded once; see [QUICKSTART.md § 2](QUICKSTART.md#2-do
 
 ## References
 
-- mlx-lm: <https://github.com/ml-explore/mlx-lm>
-- Default model: <https://huggingface.co/mlx-community/Qwen3-8B-4bit>
-- Alternate model: <https://huggingface.co/mlx-community/gpt-oss-20b-MXFP4-Q8>
-- OpenCode: <https://opencode.ai>
-- Intent by Augment: <https://www.augmentcode.com/guides/intent-walkthrough-prompt-to-merge>
+- mlx-lm: <[https://github.com/ml-explore/mlx-lm](https://github.com/ml-explore/mlx-lm)>
+- Default model: <[https://huggingface.co/mlx-community/Qwen3-8B-4bit](https://huggingface.co/mlx-community/Qwen3-8B-4bit)>
+- Alternate model: <[https://huggingface.co/mlx-community/gpt-oss-20b-MXFP4-Q8](https://huggingface.co/mlx-community/gpt-oss-20b-MXFP4-Q8)>
+- OpenCode: <[https://opencode.ai](https://opencode.ai)>
+- Intent by Augment: <[https://www.augmentcode.com/guides/intent-walkthrough-prompt-to-merge](https://www.augmentcode.com/guides/intent-walkthrough-prompt-to-merge)>
 - Background rationale: `archive/memo1.md`, `archive/memo2.md`, `archive/memo3.md`
-
----
 
 ## Legacy `mlx-serve` stack (historical)
 
@@ -157,16 +155,16 @@ scripts/mlxserve.sh stop
 
 | Command | Purpose |
 | --- | --- |
-| `scripts/mlxserve.sh start` | Background start, waits for `/health`. |
-| `scripts/mlxserve.sh status` | pid, host, port, listening socket. |
-| `scripts/mlxserve.sh health` | `curl /health` (exit 0 when healthy). |
-| `scripts/mlxserve.sh logs` | Tail `.mlxserve/mlxserve.log`. |
-| `scripts/mlxserve.sh models` | List models on disk. |
-| `scripts/mlxserve.sh pull-primary` | Download `$MLXSERVE_PRIMARY_MODEL`. |
-| `scripts/mlxserve.sh load-primary` | `POST /v1/load-model` for the primary. |
-| `scripts/mlxserve.sh smoke` | One `/v1/chat/completions` round-trip. |
-| `scripts/mlxserve.sh client-smoke [--stream]` | Full OpenAI-contract client smoke. |
-| `scripts/mlxserve.sh restart` | `stop` then `start`. |
+| scripts/mlxserve.sh start | Background start, waits for /health. |
+| scripts/mlxserve.sh status | pid, host, port, listening socket. |
+| scripts/mlxserve.sh health | curl /health (exit 0 when healthy). |
+| scripts/mlxserve.sh logs | Tail .mlxserve/mlxserve.log. |
+| scripts/mlxserve.sh models | List models on disk. |
+| scripts/mlxserve.sh pull-primary | Download $MLXSERVE_PRIMARY_MODEL. |
+| scripts/mlxserve.sh load-primary | POST /v1/load-model for the primary. |
+| scripts/mlxserve.sh smoke | One /v1/chat/completions round-trip. |
+| scripts/mlxserve.sh client-smoke [--stream] | Full OpenAI-contract client smoke. |
+| scripts/mlxserve.sh restart | stop then start. |
 
 Environment overrides used on the legacy stack: `MLXSERVE_HOST`, `MLXSERVE_PORT`, `MLXSERVE_MODEL_DIR`, `MLXSERVE_PRIMARY_MODEL`, `MLXSERVE_MAX_RESIDENT_MEM` (default `18GB`), `MLXSERVE_SKIP_MEM_PREFLIGHT` (default `1`), `MLXSERVE_CTX_SIZE` (default `16384`), `MLXSERVE_MAX_TOKENS` (default `1536`), `MLXSERVE_KV_QUANT` (default `4`), `MLXSERVE_PREFILL_CHUNK` (default `1024`), `MLXSERVE_EXTRA_ARGS`.
 
@@ -185,17 +183,17 @@ Observed during Waves 1–3 verification against the Qwen3-Coder-30B model:
 | Phase | Wired memory | Free memory |
 | --- | --- | --- |
 | Server started, no model | ~2.0 GB | ~316 MB free (plus idle inactive) |
-| After `/v1/load-model` (ready) | ~18.5 GB | ~500 MB – 2 MB |
-| After two `/v1/chat/completions` | ~18.5 GB (flat) | stable |
-| After `scripts/mlxserve.sh stop` | ~2.0 GB | ~4 GB (fully reclaimed) |
+| After /v1/load-model (ready) | ~18.5 GB | ~500 MB – 2 MB |
+| After two /v1/chat/completions | ~18.5 GB (flat) | stable |
+| After scripts/mlxserve.sh stop | ~2.0 GB | ~4 GB (fully reclaimed) |
 
 - `bytes_resident` for the loaded model: **17.18 GB**.
 - Load time: ~7–12 s cold.
 - Decode: ~90–94 tok/s on the primary model.
 - **Practical accepted-prompt ceiling: ~13.5K tokens** on the legacy stack, up from ~3.6K under Wave A. Binding constraint was a per-request GPU-memory pre-flight in `mlx-serve`, not `--ctx-size`. Wave B at `--ctx-size 16384 --prefill-chunk 1024 --kv-quant 4 --max-resident-mem 20GB` with `max_tokens=256`: ~13.6K accepted (peak ~19.0 GB active), ~14.4K rejected. The single biggest lever was `--prefill-chunk`; lowering it from 8192 to 1024 lifted the ceiling from ~4K to ~13.5K.
 - **32K context was possible but not stable.** Small prompts worked and the per-request gate accepted up to ~24K tokens at `max_tokens<=64`, but real workloads at ~22K prompt + `max_tokens=128` crashed the MLX Metal command buffer with `kIOGPUCommandBufferCallbackErrorOutOfMemory`.
-- **`--skip-mem-preflight` did NOT bypass the per-request GPU-memory gate** — only the one-shot free-RAM check at model load.
-- **The startup line `Model context length: 4096 tokens` is cosmetic** in `mlx-serve 26.8.7`; the enforced cap was `--ctx-size` (16384).
+- `--skip-mem-preflight`** did NOT bypass the per-request GPU-memory gate** — only the one-shot free-RAM check at model load.
+- **The startup line **`Model context length: 4096 tokens`** is cosmetic** in `mlx-serve 26.8.7`; the enforced cap was `--ctx-size` (16384).
 
 ### Legacy safety note: 18GB resident cap (2026-08-17 revision)
 
@@ -209,20 +207,20 @@ Measured against the legacy baseline (`scripts/mlxserve.sh` defaults + the older
 
 | Item | Value | Source |
 | --- | --- | --- |
-| Hard context cap | 16,384 tokens | `--ctx-size` (MLXServe); HTTP 400 above this |
-| Initial envelope, MCP enabled | ~8,262 tokens | after adding `augment-context-engine` MCP |
-| Per retrieval call | ~2,400 tokens / ~10 KB | bounded by `tool_output.max_lines: 200` |
-| Compaction reserve | 5,000 tokens | `compaction.reserved` |
-| Spare after one retrieval | ~722 tokens | `16,384 − 8,262 − 2,400 − 5,000` |
+| Hard context cap | 16,384 tokens | --ctx-size (MLXServe); HTTP 400 above this |
+| Initial envelope, MCP enabled | ~8,262 tokens | after adding augment-context-engine MCP |
+| Per retrieval call | ~2,400 tokens / ~10 KB | bounded by tool_output.max_lines: 200 |
+| Compaction reserve | 5,000 tokens | compaction.reserved |
+| Spare after one retrieval | ~722 tokens | 16,384 − 8,262 − 2,400 − 5,000 |
 | Peak measured successful prompt | 15,531 tokens | end-to-end Safety Phase run, natural stop |
 
 **Failure-mode ladder** (legacy stack — the same layered model applies on the current stack, with the layer 2 remediation adapted to `.mlxlm/serve.sh restart`):
 
 | Layer | What the operator sees | Response |
 | --- | --- | --- |
-| 1. ctx-size overflow | HTTP 400 `"Prompt exceeds maximum context length: N requested, 16384 available"` | Let auto-compaction fire; if it has already run this turn, restart the OpenCode session. |
-| 2. Per-request GPU gate | HTTP 400 `"requires ~XMB GPU memory but only ~YMB available"` | Restart the server — warm-cache fragmentation is not fixable client-side. |
-| 3. Driver-level instability | Server hang, GPU stall, or (once observed) a macOS kernel panic | Stop the server, honor `STRATEGY.md` stop rules, capture logs, reassess before resuming. |
+| 1. ctx-size overflow | HTTP 400 "Prompt exceeds maximum context length: N requested, 16384 available" | Let auto-compaction fire; if it has already run this turn, restart the OpenCode session. |
+| 2. Per-request GPU gate | HTTP 400 "requires ~XMB GPU memory but only ~YMB available" | Restart the server — warm-cache fragmentation is not fixable client-side. |
+| 3. Driver-level instability | Server hang, GPU stall, or (once observed) a macOS kernel panic | Stop the server, honor STRATEGY.md stop rules, capture logs, reassess before resuming. |
 
 **Do not** (each item is backed by a measured failure on the legacy stack):
 
@@ -250,5 +248,5 @@ At the time of the legacy stack, direct Augment Intent → local endpoint routin
 
 ### Legacy references
 
-- MLXServe: <https://mlxserve.com> · <https://github.com/ddalcu/mlx-serve>
-- Legacy primary model: <https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit>
+- MLXServe: <[https://mlxserve.com](https://mlxserve.com)> · <[https://github.com/ddalcu/mlx-serve](https://github.com/ddalcu/mlx-serve)>
+- Legacy primary model: <[https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit](https://huggingface.co/mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit)>

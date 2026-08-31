@@ -1,0 +1,11 @@
+Command: opencode run --auto --pure -m "mlxlm//Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit" "<coding prompt in prompt.txt>"
+CWD: /Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management
+
+PROMPT:
+Create a new file at `.mlxlm/health.sh` using your write tool. It must be a self-contained bash script (with `#!/usr/bin/env bash` and `set -u`) that performs three health checks and prints their results:
+
+1. Report the venv Python and `mlx-lm` versions from `~/.mlxlm/venv` (use `~/.mlxlm/venv/bin/python --version` and `~/.mlxlm/venv/bin/pip show mlx-lm | grep '^Version:'`).
+2. Check whether the mlx-lm server responds on `http://127.0.0.1:8080/v1/models` (use `curl -sS -m 3` and look for HTTP 200 / JSON `data` field).
+3. If a `mlx_lm.server` process is running, report its current RSS in GiB (2 decimals) and compare it against an 18 GB safety cap; if it exceeds the cap, mark this check as unhealthy. Find the process via `pgrep -f mlx_lm.server` or `ps` and read RSS from `ps -o rss=` (kB).
+
+The script must exit 0 when all three checks are healthy (venv usable, server responds, RSS under cap), and exit nonzero otherwise. Print each check on its own line, prefixed with `[OK]` or `[FAIL]`. Keep the whole script under about 60 lines. Do not include any other files. Just write `.mlxlm/health.sh` and stop.

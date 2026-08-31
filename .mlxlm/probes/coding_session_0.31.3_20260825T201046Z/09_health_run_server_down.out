@@ -1,0 +1,3 @@
+[OK] Python version check passed
+[OK] mlx-lm version check passed
+[FAIL] Server endpoint check failed
