@@ -31,5 +31,5 @@ So the answer to "what do I do": nothing in Warp.
 
 In Warp, navigate to the local respository for the `local-large-language-models-management` (at ~/intent/workspaces/favourite-coyote/local-large-language-models-management/), then:
 
-- Tab 1 `.mlxlm/serve.sh start`.
-- Tab 2 `opencode` from the repo root — you're already fully configured.
+- Tab 1: Run `.mlxlm/serve.sh start`.
+- Tab 2: Navigate to the repository you want to be working in, then type: `opencode` from the repo root — you're already fully configured.
