@@ -1,11 +1,11 @@
-Memo: Evaluate Magnitude as Local LLM Inference Runtime
+# Memo 9: Evaluate Magnitude as Local LLM Inference Runtime
 
-Project: Local LLMs Management
-Date: 2026-09-07
-Status: Proposed investigation
-Repository: https://github.com/magnitudedev/magnitude
+Project: Local LLMs Management  
+Date: 2026-09-07  
+Status: Proposed investigation  
+Repository: https://github.com/magnitudedev/magnitude  
 
-1. Executive Summary
+## 1. Executive Summary
 
 Evaluate Magnitude as a potential inference/runtime layer for our local LLM environment on the Mac Mini M4 Pro.
 
@@ -26,7 +26,7 @@ The objective is not yet to replace MLX, llama.cpp, Ollama, or our current setup
 
 ⸻
 
-2. Why Magnitude Is Relevant
+## 2. Why Magnitude Is Relevant
 
 Our requirement is not simply:
 
@@ -58,7 +58,7 @@ It should therefore be evaluated as an agent inference runtime, rather than simp
 
 ⸻
 
-3. Relationship to Our Existing Architecture
+## 3. Relationship to Our Existing Architecture
 
 The proposed architecture is:
 
@@ -92,7 +92,7 @@ Magnitude should initially be treated as an alternative runtime, not as a replac
 
 ⸻
 
-4. Existing Problem We Need to Validate Against
+## 4. Existing Problem We Need to Validate Against
 
 Our previous investigations identified an important interoperability problem involving the MLX LLM server and tool calls.
 
@@ -114,9 +114,9 @@ Magnitude should therefore be tested specifically for tool-call reliability, not
 
 ⸻
 
-5. Primary Investigation Questions
+## 5. Primary Investigation Questions
 
-A. Model compatibility
+### A. Model compatibility
 
 Determine which models work well with Magnitude on the Mac Mini M4 Pro.
 
@@ -131,7 +131,7 @@ Do not assume that the model recommended by Magnitude is automatically the best 
 
 ⸻
 
-B. Tool calling
+### B. Tool calling
 
 This is one of the most important tests.
 
@@ -165,7 +165,7 @@ A single successful tool call is insufficient.
 
 ⸻
 
-C. Timeout behaviour
+### C. Timeout behaviour
 
 Reproduce the timeout scenarios currently experienced with local Qwen.
 
@@ -184,7 +184,7 @@ Compare Magnitude against the current MLX-based runtime.
 
 ⸻
 
-D. Agent task completion
+### D. Agent task completion
 
 Benchmark real coding tasks rather than simple prompts.
 
@@ -212,7 +212,7 @@ This is much more representative of our intended workload.
 
 ⸻
 
-6. Benchmark Matrix
+## 6. Benchmark Matrix
 
 Create a repeatable benchmark:
 
@@ -226,7 +226,7 @@ The benchmark should use identical prompts, repositories and tasks wherever poss
 
 ⸻
 
-7. Hardware Considerations
+## 7. Hardware Considerations
 
 The target machine is:
 
@@ -250,7 +250,7 @@ A model that achieves a high benchmark tokens/sec but causes excessive memory pr
 
 ⸻
 
-8. Architecture Principle
+## 8. Architecture Principle
 
 We should separate:
 
@@ -289,7 +289,7 @@ This gives Local LLMs Management the ability to change one layer without redesig
 
 ⸻
 
-9. Recommended Experiment
+## 9. Recommended Experiment
 
 Install Magnitude alongside the existing runtime.
 
@@ -319,7 +319,7 @@ If yes, continue with performance and quality benchmarking.
 
 ⸻
 
-10. Success Criteria
+## 10. Success Criteria
 
 Magnitude should only become the preferred runtime if it demonstrates a meaningful improvement in the dimensions that matter to us.
 
@@ -357,7 +357,7 @@ Operational simplicity
 
 ⸻
 
-11. Potential Role in Local LLMs Management
+## 11. Potential Role in Local LLMs Management
 
 If the evaluation succeeds, Magnitude could become:
 
@@ -381,7 +381,7 @@ while other runtimes remain available for experimentation or different workloads
 
 ⸻
 
-12. Important Non-Goals
+## 12. Important Non-Goals
 
 This investigation should not:
 
@@ -397,9 +397,9 @@ The goal is evidence-based selection of the best local inference runtime.
 
 ⸻
 
-13. Next Steps
+## 13. Next Steps
 
-Phase 1 — Inspect
+### Phase 1 — Inspect
 
 Review the Magnitude repository and documentation:
 
@@ -417,13 +417,13 @@ Determine:
 * model management;
 * configuration options.
 
-Phase 2 — Install
+### Phase 2 — Install
 
 Install Magnitude alongside the existing local LLM environment.
 
 Do not modify or remove the working runtime.
 
-Phase 3 — Integrate
+### Phase 3 — Integrate
 
 Connect:
 
@@ -431,7 +431,7 @@ OpenCode → Magnitude → Qwen
 
 and verify basic inference.
 
-Phase 4 — Tool-call test
+### Phase 4 — Tool-call test
 
 Run a repository task requiring:
 
@@ -441,11 +441,11 @@ Run a repository task requiring:
 * test execution;
 * multiple sequential tool calls.
 
-Phase 5 — Benchmark
+### Phase 5 — Benchmark
 
 Compare Magnitude against the current MLX runtime.
 
-Phase 6 — Decide
+### Phase 6 — Decide
 
 Classify Magnitude as:
 
@@ -458,7 +458,7 @@ based on measured results.
 
 ⸻
 
-14. Architectural Recommendation
+## 14. Architectural Recommendation
 
 Recommendation: TRIAL MAGNITUDE.
 
@@ -483,7 +483,7 @@ Magnitude is now a serious candidate for that runtime layer.
 
 ⸻
 
-15. References
+## 15. References
 
 * Magnitude GitHub repository:
     https://github.com/magnitudedev/magnitude
@@ -498,7 +498,7 @@ Magnitude is now a serious candidate for that runtime layer.
 
 ⸻
 
-Decision
+## Decision
 
 Status: INVESTIGATE
 
