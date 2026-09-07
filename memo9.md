@@ -61,7 +61,7 @@ It should therefore be evaluated as an agent inference runtime, rather than simp
 ## 3. Relationship to Our Existing Architecture
 
 The proposed architecture is:
-
+```
 ┌──────────────────────────────┐
 │       Coding Interfaces      │
 │                              │
@@ -87,7 +87,7 @@ The proposed architecture is:
 ┌──────────────────────────────┐
 │       Mac Mini M4 Pro        │
 └──────────────────────────────┘
-
+```
 Magnitude should initially be treated as an alternative runtime, not as a replacement for the higher-level agent tooling.
 
 ⸻
@@ -97,7 +97,7 @@ Magnitude should initially be treated as an alternative runtime, not as a replac
 Our previous investigations identified an important interoperability problem involving the MLX LLM server and tool calls.
 
 In particular, we observed that:
-
+```
 mlx_lm.server
         ↓
 tool_calls[].id = null
@@ -105,7 +105,7 @@ tool_calls[].id = null
 OpenAI-compatible client expects a valid tool-call ID
         ↓
 OpenCode can abort the operation
-
+```
 This means that raw model quality is not the only variable determining whether a local coding agent works.
 
 The inference runtime and API protocol implementation are equally important.
@@ -142,7 +142,7 @@ tool_calls[].id
 and other OpenAI-compatible tool-call fields.
 
 Test:
-
+```
 Agent
   ↓
 tool request
@@ -158,7 +158,7 @@ agent executes tool
 tool result
   ↓
 model continues
-
+```
 The test must include multiple sequential tool calls.
 
 A single successful tool call is insufficient.
@@ -189,7 +189,7 @@ Compare Magnitude against the current MLX-based runtime.
 Benchmark real coding tasks rather than simple prompts.
 
 Example:
-
+```
 Inspect repository
         ↓
 Understand existing implementation
@@ -207,7 +207,7 @@ Fix implementation
 Run tests again
         ↓
 Report result
-
+```
 This is much more representative of our intended workload.
 
 ⸻
@@ -216,11 +216,11 @@ This is much more representative of our intended workload.
 
 Create a repeatable benchmark:
 
-Runtime	Model	Tool calls	TTFT	tok/s	Timeout	Task success
-MLX	Qwen	✓				
-llama.cpp	Qwen	✓				
-Magnitude	Qwen	✓				
-Ollama	Qwen	✓				
+| Runtime Model | Tool calls	TTFT	tok/s	Timeout	Task | success |  
+| MLX | Qwen | ✓ |  
+|llama.cpp | Qwen | ✓ |  
+| Magnitude | Qwen | ✓ |  
+| Ollama | Qwen	| ✓ |  
 
 The benchmark should use identical prompts, repositories and tasks wherever possible.
 
