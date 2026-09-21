@@ -1,0 +1,92 @@
+=== Wave 2 lifecycle cycles ===
+2026-09-21T19:15:55Z
+
+--- (1) .mlxlm/serve.sh models ---
+supported model aliases (Wave 2):
+  qwen3-8b    /Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+
+--- (2) usage banner (no args, exit code check) ---
+usage: .mlxlm/serve.sh {start|stop|status|log|models}
+usage_exit=2
+
+--- (3) unknown-alias rejection (MLXLM_SERVE_MODEL=bogus start) ---
+error: unknown model alias: bogus
+run: .mlxlm/serve.sh models   (for supported aliases)
+bogus_start_exit=2
+pidfile_present_after_bogus=no
+mlx_lm_procs_after_bogus=0
+v1_models_http_after_bogus=000curl_err
+
+
+--- (4) DEFAULT start (no env var) ---
+started: pid=68944 alias=qwen3-8b model=/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit log=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/mlxlm-serve.log
+default_start_exit=0
+waiting for /v1/models (up to 90s)...
+ready_after=2s attempts=2 http=200
+
+--- (5) status ---
+  PID    RSS COMMAND
+68944 4802720 /opt/homebrew/Cellar/python@3.12/3.12.13/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -m mlx_lm server --host 127.0.0.1 --port 8080 --model /Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+
+--- /v1/models ---
+{"object": "list", "data": [{"id": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "object": "model", "created": 1790018166}]}
+
+--- (6) health.sh ---
+[OK] Python version: Python 3.12.13
+[OK] mlx-lm version: 0.31.3
+[OK] Server endpoint check passed
+[OK] Server RSS 4.58 GiB under 18 GB cap
+health_exit=0
+
+--- (7) minimal chat probe against Qwen3-8B-4bit ---
+chat_http=200
+{"id": "chatcmpl-03898cba-4574-4df2-9308-6d32176632f4", "system_fingerprint": "0.31.3-0.32.2-macOS-26.5.2-arm64-arm-64bit-applegpu_g16s", "object": "chat.completion", "model": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "created": 1790018166, "choices": [{"index": 0, "finish_reason": "stop", "message": {"role": "assistant", "content": "\n\nOK", "reasoning": "\n\n"}}], "usage": {"prompt_tokens": 22, "completion_tokens": 6, "total_tokens": 28, "prompt_tokens_details": {"cached_tokens": 0}}}
+
+--- (8) stop (default cycle) ---
+stopped: pid=68944
+stop_exit=0
+pidfile_present_after_stop=no
+v1_models_http_after_stop=000curl_err
+
+--- (9) EXPLICIT alias start: MLXLM_SERVE_MODEL=qwen3-8b .mlxlm/serve.sh start ---
+started: pid=71225 alias=qwen3-8b model=/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit log=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/mlxlm-serve.log
+explicit_start_exit=0
+ready_after=2s http=200
+
+--- (10) status + health (explicit alias cycle) ---
+  PID    RSS COMMAND
+71225 4611088 /opt/homebrew/Cellar/python@3.12/3.12.13/Frameworks/Python.framework/Versions/3.12/Resources/Python.app/Contents/MacOS/Python -m mlx_lm server --host 127.0.0.1 --port 8080 --model /Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit
+
+--- /v1/models ---
+{"object": "list", "data": [{"id": "/Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit", "object": "model", "created": 1790018463}]}
+[OK] Python version: Python 3.12.13
+[OK] mlx-lm version: 0.31.3
+[OK] Server endpoint check passed
+[OK] Server RSS 4.58 GiB under 18 GB cap
+health_exit=0
+
+--- (11) stop (explicit alias cycle) ---
+stopped: pid=71225
+stop_exit=0
+v1_models_http_after_stop2=000curl_err
+pidfile_present_after_stop2=no
+
+--- (12) stop-when-not-running (idempotency) ---
+no pid file
+stop_exit_when_absent=0
+
+--- (13) log subcommand output (last 5 lines only) ---
+  warnings.warn(
+2026-09-21 21:21:02,739 - INFO - Starting httpd at 127.0.0.1 on port 8080...
+127.0.0.1 - - [21/Sep/2026 21:21:03] "GET /v1/models HTTP/1.1" 200 -
+127.0.0.1 - - [21/Sep/2026 21:21:03] "GET /v1/models HTTP/1.1" 200 -
+127.0.0.1 - - [21/Sep/2026 21:21:04] "GET /v1/models HTTP/1.1" 200 -
+
+--- (14) status-when-not-running ---
+not running
+
+--- /v1/models ---
+curl: (7) Failed to connect to 127.0.0.1 port 8080 after 0 ms: Couldn't connect to server
+
+status_exit_when_absent=0
+

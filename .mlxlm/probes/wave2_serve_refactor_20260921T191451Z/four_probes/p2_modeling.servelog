@@ -1,0 +1,7 @@
+2026-09-21 21:17:02,555 - INFO - Prompt Cache: 3 sequences, 1.32 GB
+2026-09-21 21:17:02,555 - INFO - - assistant: 3 sequences, 1.32 GB
+2026-09-21 21:17:02,555 - INFO - - user: 0 sequences, 0.00 GB
+2026-09-21 21:17:02,555 - INFO - - system: 0 sequences, 0.00 GB
+127.0.0.1 - - [21/Sep/2026 21:17:02] "POST /v1/chat/completions HTTP/1.1" 200 -
+2026-09-21 21:17:03,095 - INFO - Prompt processing progress: 36/37
+2026-09-21 21:17:03,147 - INFO - Prompt processing progress: 37/37
