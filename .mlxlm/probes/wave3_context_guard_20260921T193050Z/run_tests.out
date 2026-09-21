@@ -1,0 +1,26 @@
+REPO_ROOT=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management
+EVID_DIR=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/probes/wave3_context_guard_20260921T193050Z
+WRAPPER=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/scripts/opencode-single-repo.sh
+NON_GIT_DIR=/var/folders/t7/396q8qbj2rdgtb5y_gn0gmq00000gn/T/wave3_nongit.XXXXXX.cq03hK8BPb
+WORKSPACES_PARENT=/Users/willemvanheemstra/intent/workspaces
+--- scenario=s1_repo_root from=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management ---
+  exit=0 (expected=0)
+  launch_delta=1 (expected=yes)
+  PASS
+--- scenario=s2_repo_subdir from=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/scripts ---
+  exit=0 (expected=0)
+  launch_delta=1 (expected=yes)
+  PASS
+--- scenario=s3_workspaces_parent from=/Users/willemvanheemstra/intent/workspaces ---
+  exit=2 (expected=2)
+  launch_delta=0 (expected=no)
+  PASS
+--- scenario=s4_non_git_tmp from=/var/folders/t7/396q8qbj2rdgtb5y_gn0gmq00000gn/T/wave3_nongit.XXXXXX.cq03hK8BPb ---
+  exit=2 (expected=2)
+  launch_delta=0 (expected=no)
+  PASS
+--- fake_opencode_invocations.log ---
+{"scenario":"s1_repo_root","cwd":"/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management","argc":4,"argv":["--model","qwen3-8b","--flag","s1_repo_root arg"]}
+{"scenario":"s2_repo_subdir","cwd":"/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management","argc":4,"argv":["--model","qwen3-8b","--flag","s2_repo_subdir arg"]}
+--- cleanup ---
+ALL SCENARIOS PASS

@@ -1,0 +1,4 @@
+/Users/willemvanheemstra/intent/workspaces/opencode.json  size=1386  mtime=2026-08-31T23:09:03Z  sha256=56cccfa51584d287ff4c1a47a3b3ff512aa2b1a163ae546388fbf18bb91d490d
+opencode.json  size=1386  mtime=2026-08-24T00:11:11Z  sha256=56cccfa51584d287ff4c1a47a3b3ff512aa2b1a163ae546388fbf18bb91d490d
+.mlxlm/serve.sh  size=3070  mtime=2026-09-21T21:15:28Z  sha256=782bf87d7d90ffd9bb8d24fa74afea1012da0ab6e64e92a42db7e8322d6d1b48
+.mlxlm/health.sh  size=1228  mtime=2026-08-31T09:31:24Z  sha256=e40dec0cd9894c8d8dc8715a56f8288b24b76d7d0b7241fc947d545b8529a668

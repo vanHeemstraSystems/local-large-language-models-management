@@ -1,0 +1,3 @@
+absent (expected): /Users/willemvanheemstra/intent/workspaces/.opencodeignore
+absent (expected): .opencodeignore
+absent (expected): /Users/willemvanheemstra/intent/workspaces/favourite-coyote/.opencodeignore

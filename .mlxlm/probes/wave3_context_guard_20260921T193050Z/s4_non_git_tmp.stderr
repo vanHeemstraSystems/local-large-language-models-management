@@ -1,0 +1,9 @@
+opencode-single-repo: refusing to launch opencode: current directory is not inside a git worktree.
+opencode-single-repo:   cwd = /private/var/folders/t7/396q8qbj2rdgtb5y_gn0gmq00000gn/T/wave3_nongit.XXXXXX.cq03hK8BPb
+opencode-single-repo: 
+opencode-single-repo: opencode's tool loop reads from and writes to the working directory.
+opencode-single-repo: Running it outside a git repository lets edits escape any repository's
+opencode-single-repo: history and blends unrelated files into one session's context.
+opencode-single-repo: 
+opencode-single-repo: Remediation: cd into a git repository (its root or a subdirectory),
+opencode-single-repo: then re-run this wrapper.

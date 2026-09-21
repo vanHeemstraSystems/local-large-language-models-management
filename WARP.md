@@ -32,4 +32,10 @@ So the answer to "what do I do": nothing in Warp.
 In Warp, navigate to the local respository for the `local-large-language-models-management` (at ~/intent/workspaces/favourite-coyote/local-large-language-models-management/), then:
 
 - Tab 1: Run `.mlxlm/serve.sh start`.
-- Tab 2: Navigate to the repository you want to be working in, then type: `opencode` from the repo root — you're already fully configured.
+- Tab 2: Navigate to the repository you want to be working in, then run `scripts/opencode-single-repo.sh` (the single-repository guard wrapper) from that repository — you're already fully configured.
+
+## Why use the guard wrapper instead of plain `opencode`?
+
+`scripts/opencode-single-repo.sh` is the safe entry point for every OpenCode session started from Warp. It verifies the current directory is inside a git worktree, resolves the repository root via `git rev-parse --show-toplevel`, `cd`s to it, and then `exec`s `opencode` with every argument preserved. If launched from `~/intent/workspaces/` (the parent of every workspace) or from any non-git directory, it exits non-zero with a clear remediation message and never starts opencode.
+
+Direct `opencode` launched from the workspaces parent is unsafe because that directory contains an `opencode.json` sibling to the workspaces themselves. Opencode picks that config up and a single session then reads across every repository beneath the parent, blurring per-repository context and history. The wrapper keeps each session pinned to exactly one repository root.

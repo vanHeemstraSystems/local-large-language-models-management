@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+printf '{"scenario":"%s","cwd":"%s","argc":%d,"argv":[' "${SCENARIO:-unset}" "$(pwd -P)" "$#" >> "/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/probes/wave3_context_guard_20260921T193050Z/fake_opencode_invocations.log"
+sep=""
+for a in "$@"; do
+    printf '%s"%s"' "$sep" "$a" >> "/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/probes/wave3_context_guard_20260921T193050Z/fake_opencode_invocations.log"
+    sep=","
+done
+printf ']}\n' >> "/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/.mlxlm/probes/wave3_context_guard_20260921T193050Z/fake_opencode_invocations.log"
