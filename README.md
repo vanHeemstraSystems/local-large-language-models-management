@@ -113,6 +113,26 @@ Safety baseline enforced by `opencode.json` on the current stack:
 
 Historical measurements from the pre-migration `mlx-serve` + Qwen3-Coder-30B stack (context budget, failure-mode ladder, memory-envelope numbers) are preserved in the *Legacy *`mlx-serve`* stack* appendix below. They describe a different runtime and a different (much larger) model, so the specific numbers do not directly apply to the current `mlx-lm.server` + Qwen3-8B-4bit stack — but the layered failure model and the *do-not* list they document remain useful guidance.
 
+## Rejected V2 refactor proposals (archived)
+
+Three earlier proposals to overhaul the runtime and configuration were evaluated in Waves 0–4c and **rejected**. They are preserved unchanged for historical reference at:
+
+- `archive/ADVISE_x5f_REFACTOR_x5f_V2.md`
+- `archive/OPENCODE_x5f_REFACTOR_x5f_V2.md`
+- `archive/SERVER_x5f_REFACTOR_x5f_V2.md`
+
+Do not reapply them. The operator-visible outcomes were:
+
+- **Default model:** Qwen3-8B-4bit remains the validated production default in `opencode.json`. The V2 proposal to switch to `mlx-community/Qwen3-Coder-8B-4bit` was rejected — that model does not exist on `mlx-community` and must not be downloaded or referenced.
+- **`.mlxlm/serve.sh`:** kept Bash 3.2-compatible, starts Qwen3-8B-4bit by default, honours `MLXLM_SERVE_MODEL=qwen3-8b`. The V2 proposal to pass an unsupported `--max-kv-size` flag and to advertise unvalidated model aliases (including the non-existent Qwen3-Coder-8B-4bit) was rejected.
+- **Single-repo entry point:** `scripts/opencode-single-repo.sh` is the required launcher. It refuses `~/intent/workspaces/` and any non-git directory, and resolves the git worktree root before `exec`ing `opencode`.
+- **`.opencodeignore`:** ineffective with OpenCode's ripgrep integration. Do not create one and do not present it as a protection.
+- **`tool_output` caps:** `max_lines=200` and `max_bytes=16384` are hard safety defaults. The V2 experiment at `max_lines=300` induced a 12.38 GB prompt-cache spike and a Metal IOGPU OOM; do not raise it.
+- **Timing and compaction:** `timeout=300000`, `compaction.reserved=5000`, and `compaction.preserve_recent_tokens=4000` remain unchanged — isolated increases/decreases showed no measurable benefit and are not adopted.
+- **30B coder target:** remains excluded from the current safety baseline; it is not proven safe under the 18 GB / 16,384-token envelope.
+
+The 18 GB resident-memory policy, the 16,384-token context ceiling, single-session discipline, and the rollback path via the preserved `~/.mlxlm/venv-py39-mlxlm0291.bak` venv all stand.
+
 ## Fallback path
 
 If Qwen3-8B-4bit is insufficient for a task, `opencode.json` already declares `gpt-oss-20b-MXFP4-Q8` as an alternate model on the same provider. Switch the top-level `model` field or select the alternate at runtime in OpenCode. Note: `gpt-oss-20b` uses the Harmony tool-call idiom, which `mlx_lm.server`'s built-in parser does not fully handle in every path — see [QUICKSTART.md → Known errors](QUICKSTART.md#known-errors-and-their-resolution) for the current status.

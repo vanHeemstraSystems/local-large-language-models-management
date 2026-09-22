@@ -222,6 +222,11 @@ Do not delegate `git commit` or `git push` to the model. Reject any edit you wou
 - **Do not paste large files into the prompt.** Tool output is already capped at 200 lines / 16 KB (`tool_output` in `opencode.json`); manual pastes bypass that cap and blow the context.
 - **Do not run parallel OpenCode sessions against a single **`mlx-lm.server`**.** Concurrent requests with different prompt lengths trigger the W4 `BatchRotatingKVCache.merge` crash. The `agent.title.disable` / `agent.summary.disable` settings in `opencode.json` serialize one session's own traffic; they do not protect against a second client.
 - **Do not use **`gpt-oss-20b`** for tool-calling work.** `mlx_lm.server` does not parse its Harmony `commentary` channel into structured `tool_calls[]`, so MCP tool loops never fire. Keep the default `Qwen3-8B-4bit`.
+- **Do not raise **`tool_output.max_lines`** above 200 (or **`max_bytes`** above 16384).** The V2 experiment at `max_lines=300` produced a ~12.38 GB prompt-cache spike and a Metal IOGPU OOM. Those values are hard safety defaults, not tuning knobs.
+- **Do not create **`.opencodeignore`**.** OpenCode's ripgrep integration does not honour it, so the file is not a protection. Rely on `scripts/opencode-single-repo.sh` (single-repo scoping) and `tool_output` caps instead.
+- **Do not download **`mlx-community/Qwen3-Coder-8B-4bit`**.** No such model exists on `mlx-community`. Any documentation, script, or note that recommends it is stale — keep the default `Qwen3-8B-4bit`, or use the declared alternate `gpt-oss-20b-MXFP4-Q8` per the *Fallback path* in `README.md`.
+- **Do not change **`timeout=300000`** or **`compaction.reserved=5000`** / **`preserve_recent_tokens=4000`**.** Isolated increases/decreases were measured and showed no benefit; they are not accepted changes.
+- **Do not attempt Qwen3-Coder-30B on this stack.** It is excluded from the current safety baseline (18 GB RSS / 16,384-context envelope) and was the panicked-task workload on the pre-migration `mlx-serve` stack; see the *Rejected V2 refactor proposals (archived)* section in `README.md`.
 
 ## Known errors and their resolution
 
