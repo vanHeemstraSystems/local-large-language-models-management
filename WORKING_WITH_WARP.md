@@ -16,9 +16,9 @@ In Warp run the following command from a terminal in the Local LLMs Management r
 bash .mlxlm/health.sh
 ```
 
-Back in Augmemnt Intent go to the workspace of another local repository (e.g. Pixstars Architecture Source):
+Back in Augment Intent go to the workspace of another local repository (e.g. Pixstars Architecture Source):
 
-On the (...) menu right of the workspace's title (here: Pixsstars Architecture Source) choose "Open with Warp".
+On the (...) menu right of the workspace's title (here: Pixstars Architecture Source) choose "Open with Warp".
 
 In Warp run the following command from a terminal in the (here: Pixstars Architecture Source) repository you just arrived at:
 
