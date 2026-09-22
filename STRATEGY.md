@@ -310,6 +310,8 @@ Field experience surfaced *three* resource/driver failure modes on the pre-migra
 
 Compaction/truncation and retrieval budgets address layer 1 primarily and layer 2 secondarily; resident-memory headroom and session-restart discipline address layer 2 and (as best as we can) layer 3.
 
+The V2 refactor proposals (archived under `archive/ADVISE_x5f_REFACTOR_x5f_V2.md`, `archive/OPENCODE_x5f_REFACTOR_x5f_V2.md`, `archive/SERVER_x5f_REFACTOR_x5f_V2.md`) were evaluated against this failure-mode taxonomy in Waves 0–4c and **rejected**: raising `tool_output.max_lines` to 300 triggered a ~12.38 GB prompt-cache spike and a Metal IOGPU OOM (layer 2/3), switching the default to a non-existent `mlx-community/Qwen3-Coder-8B-4bit` was not viable, `--max-kv-size` is not a supported `mlx-lm.server` flag, and `.opencodeignore` is not honoured by OpenCode's ripgrep integration. See the *Rejected V2 refactor proposals (archived)* section of `README.md` for the operator-facing summary.
+
 ## Runtime-layer bugs surfaced by the mlx-lm migration
 
 Migration to `mlx-lm 0.29.1` exposed three runtime-layer client-server contract issues that are distinct from the resource/driver failure modes above. They break the request/response contract rather than exhaust resources, and their evidence lives under `.mlxlm/probes/`.

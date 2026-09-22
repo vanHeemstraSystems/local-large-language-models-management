@@ -1,0 +1,68 @@
+feat(mlxlm): Wave 2 — model-selectable serve.sh (macOS Bash 3.2-safe)
+
+Refactor .mlxlm/serve.sh so the warm-default model is the validated local
+Qwen3-8B-4bit and the model is selectable via a single, testable env var,
+without introducing any Bash-4-only syntax or unsupported mlx-lm 0.31.3
+server flags.
+
+Runtime changes (this commit)
+- .mlxlm/serve.sh: rewritten as a Bash 3.2-safe script (macOS /bin/bash 3.2.57).
+  * New env var MLXLM_SERVE_MODEL selects the warm model (default: qwen3-8b).
+  * Model registry via a case-based resolve_model() helper (no declare -A,
+    no mapfile/readarray, no ${var,,}, no [[ =~ PCRE).
+  * Alias table today: qwen3-8b -> ~/.mlx-serve/models/mlx-community/Qwen3-8B-4bit.
+    Unknown alias -> exit 2 with a clear error; the server is NOT started
+    and no PID file is written.
+  * Missing model dir on disk -> exit 3.
+  * Preserved subcommands: start, stop, status, log (behavior identical).
+  * Additive subcommand: models (prints the supported alias table).
+  * Header comment corrected: mlx-lm 0.31.3 on Python 3.12 (was stale 0.29.1).
+
+Files intentionally NOT changed in this commit (per Wave 2 brief)
+- opencode.json, .mlxlm/health.sh, README.md, QUICKSTART.md, STRATEGY.md,
+  WARP.md, model weights, and ~/intent/workspaces/opencode.json.
+- No .opencodeignore is created.
+- No --max-kv-size (does not exist in mlx-lm 0.31.3).
+- No --prompt-cache-size / --prompt-cache-bytes (separate controlled
+  experiment required per Wave 0 corrections; out of scope here).
+- No Qwen3-Coder-8B-4bit reference (does not exist upstream).
+
+Evidence bundle (also in this commit)
+- .mlxlm/probes/wave2_serve_refactor_20260921T191451Z/
+  * serve.sh.pre — verbatim pre-refactor rollback source.
+  * SUMMARY.md — acceptance-criteria checklist, behavior-change notes,
+    honest limitations, rollback recipe.
+  * lifecycle_cycles.txt — 14 lifecycle steps: models subcommand, usage
+    banner, unknown-alias rejection, default start, /v1/models readiness,
+    status, health.sh, minimal chat, stop, explicit-alias start/stop,
+    stop-when-not-running, log, status-when-not-running.
+  * tool_protocol/ — full .mlxlm/probes/tool_protocol_test.sh output
+    (ALL PASS both stream=false and stream=true).
+  * four_probes/ — P1/P2/P3/P4 opencode NDJSON, servelog deltas, empty
+    stderrs, summary.txt. All four exit 0 with step_finish.reason=stop
+    (P3 = tool-calls then stop for the augment-context-engine MCP call).
+  * probes_servelog_delta.txt, full_wave_servelog_delta.txt,
+    log_offsets.txt — server-log deltas and byte offsets.
+
+Server-log health across the full wave delta (77 lines):
+  Traceback=0  BatchRotatingKVCache=0  IOGPU=0  shape-mismatch=0
+  kIOGPUCommandBuffer=0  Broken pipe=0  UnknownError=0  ERROR=0
+HTTP: POST /v1/chat/completions -> 8x200; GET /v1/models -> 7x200.
+
+Behavior change vs pre-refactor serve.sh (recorded honestly)
+- Warm-default model now visible in /v1/models is Qwen3-8B-4bit rather
+  than gpt-oss-20b-MXFP4-Q8. Every runtime configuration in the repo
+  (opencode.json, tool_protocol_test.sh) already targeted Qwen3-8B-4bit;
+  the warm default now matches that verified model.
+- Additive fields in the start-line output (alias=, model=). No caller
+  in-repo parses this line.
+- New models subcommand; original subcommand set unchanged.
+
+Rollback
+  cp .mlxlm/probes/wave2_serve_refactor_20260921T191451Z/serve.sh.pre \
+     .mlxlm/serve.sh
+  chmod +x .mlxlm/serve.sh
+  .mlxlm/serve.sh stop || true ; .mlxlm/serve.sh start
+
+Kept separate from the Wave 1 evidence-only commit (7761fff), per the
+Wave 2 task brief.

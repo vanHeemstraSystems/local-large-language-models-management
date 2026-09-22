@@ -1,0 +1,9 @@
+=== Wave 1 environment snapshot ===
+2026-09-21T19:07:33Z
+
+opencode: 1.18.31
+auggie: 0.34.0 (commit 81042879)
+python3: Python 3.9.6
+bash: 3.2.57(1)-release
+shell: /bin/zsh
+uname: Darwin 25.5.0 arm64

@@ -103,13 +103,15 @@ You should see a process listening on `127.0.0.1:8080` and `/v1/models` returnin
 
 Expect `Version: 0.31.3`. Older versions (0.29.1) required the retired A.1 venv patch — see `.mlxlm/PATCHES.md` if you need to roll back.
 
-### 3. Launch OpenCode from the repository root
+### 3. Launch OpenCode via the single-repository guard wrapper
 
 ```sh
-opencode
+scripts/opencode-single-repo.sh
 ```
 
-OpenCode reads `opencode.json`, connects to `http://127.0.0.1:8080/v1`, defaults to Qwen3-8B-4bit, and spawns the `augment-context-engine` MCP server via `auggie --mcp --mcp-auto-workspace`.
+`scripts/opencode-single-repo.sh` is the recommended entry point for every OpenCode session. It verifies the current directory is inside a git worktree, resolves the repository root via `git rev-parse --show-toplevel`, `cd`s to it, and then `exec`s `opencode` with every argument preserved. Launching plain `opencode` from `~/intent/workspaces/` (the parent of every workspace) picks up the parent-level `~/intent/workspaces/opencode.json` and lets a single session read across every repository beneath it; the wrapper refuses that directory (and any non-git directory) with a non-zero exit before any opencode process starts.
+
+Once the wrapper hands off, OpenCode reads the repo's `opencode.json`, connects to `http://127.0.0.1:8080/v1`, defaults to Qwen3-8B-4bit, and spawns the `augment-context-engine` MCP server via `auggie --mcp --mcp-auto-workspace`.
 
 ### 4. Confirm the loop is live
 
@@ -150,7 +152,7 @@ Day-to-day coding from Warp uses two terminal tabs and one focused OpenCode sess
 | Tab | Working directory | Purpose | Commands |
 | --- | --- | --- | --- |
 | 1 | anywhere | mlx-lm.server control | .mlxlm/serve.sh start / status / stop; tail -f .mlxlm/mlxlm-serve.log |
-| 2 | repository root | OpenCode agent loop | opencode |
+| 2 | repository root | OpenCode agent loop | scripts/opencode-single-repo.sh |
 
 Keep Tab 1 visible while working in Tab 2 so server errors (`BatchRotatingKVCache`, OOM, IOGPU) surface immediately in the log.
 
@@ -169,8 +171,8 @@ Preflight checklist — run in order, do not skip:
 
 1. Server up: `.mlxlm/serve.sh status` shows a live PID and `/v1/models` returns JSON.
 2. mlx-lm version correct: `~/.mlxlm/venv/bin/python -m pip show mlx-lm | grep -i '^Version:'` reports `Version: 0.31.3` (upstream `ToolCallFormatter` supplies the tool-call id natively).
-3. `cd` into the repository you want to work on and run `opencode` from that directory. OpenCode reads that repo's `opencode.json` and routes model calls to `http://127.0.0.1:8080/v1`.
-4. Working in a different repository? Copy this repo's `opencode.json` there first as a template (provider URL, default model, MCP wiring, context/output caps, `tool_output` caps).
+3. `cd` into the repository you want to work on and run `scripts/opencode-single-repo.sh` from that directory (or any subdirectory of the repository). The wrapper refuses `~/intent/workspaces/` and any non-git directory before opencode starts, then hands off from the resolved repository root. OpenCode reads that repo's `opencode.json` and routes model calls to `http://127.0.0.1:8080/v1`.
+4. Working in a different repository? Copy this repo's `opencode.json` there first as a template (provider URL, default model, MCP wiring, context/output caps, `tool_output` caps), and run the same wrapper from that repository. The wrapper does not require the working repo to be this one; it only requires that you are inside some git worktree.
 
 ### How to prompt for coding work
 
@@ -220,6 +222,11 @@ Do not delegate `git commit` or `git push` to the model. Reject any edit you wou
 - **Do not paste large files into the prompt.** Tool output is already capped at 200 lines / 16 KB (`tool_output` in `opencode.json`); manual pastes bypass that cap and blow the context.
 - **Do not run parallel OpenCode sessions against a single **`mlx-lm.server`**.** Concurrent requests with different prompt lengths trigger the W4 `BatchRotatingKVCache.merge` crash. The `agent.title.disable` / `agent.summary.disable` settings in `opencode.json` serialize one session's own traffic; they do not protect against a second client.
 - **Do not use **`gpt-oss-20b`** for tool-calling work.** `mlx_lm.server` does not parse its Harmony `commentary` channel into structured `tool_calls[]`, so MCP tool loops never fire. Keep the default `Qwen3-8B-4bit`.
+- **Do not raise **`tool_output.max_lines`** above 200 (or **`max_bytes`** above 16384).** The V2 experiment at `max_lines=300` produced a ~12.38 GB prompt-cache spike and a Metal IOGPU OOM. Those values are hard safety defaults, not tuning knobs.
+- **Do not create **`.opencodeignore`**.** OpenCode's ripgrep integration does not honour it, so the file is not a protection. Rely on `scripts/opencode-single-repo.sh` (single-repo scoping) and `tool_output` caps instead.
+- **Do not download **`mlx-community/Qwen3-Coder-8B-4bit`**.** No such model exists on `mlx-community`. Any documentation, script, or note that recommends it is stale — keep the default `Qwen3-8B-4bit`, or use the declared alternate `gpt-oss-20b-MXFP4-Q8` per the *Fallback path* in `README.md`.
+- **Do not change **`timeout=300000`** or **`compaction.reserved=5000`** / **`preserve_recent_tokens=4000`**.** Isolated increases/decreases were measured and showed no benefit; they are not accepted changes.
+- **Do not attempt Qwen3-Coder-30B on this stack.** It is excluded from the current safety baseline (18 GB RSS / 16,384-context envelope) and was the panicked-task workload on the pre-migration `mlx-serve` stack; see the *Rejected V2 refactor proposals (archived)* section in `README.md`.
 
 ## Known errors and their resolution
 
@@ -245,9 +252,9 @@ Concrete sequence to smoke-test the full stack:
 .mlxlm/serve.sh status
 ~/.mlxlm/venv/bin/python -m pip show mlx-lm | grep -i '^Version:'
 
-# Terminal 2 — from repo root
+# Terminal 2 — from repo root (via the guard wrapper)
 cd /path/to/local-large-language-models-management
-opencode
+scripts/opencode-single-repo.sh
 ```
 
 Inside OpenCode:

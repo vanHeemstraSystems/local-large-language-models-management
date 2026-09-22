@@ -1,0 +1,12 @@
+=== opencode debug scrap — projects opencode has ever indexed ===
+2026-09-21T19:07:34Z
+Total projects: 7
+  id=global               vcs=none  worktree=/
+  id=4aeac633f6db79b5135a vcs=git   worktree=/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management
+  id=751a908def58c2d2e8f9 vcs=git   worktree=/Users/willemvanheemstra/intent/workspaces/scientific-puma/architecture-decision-records-management
+  id=43d7eba45ce052fb4c8d vcs=git   worktree=/Users/willemvanheemstra/intent/workspaces/fancy-alpaca/source
+  id=7466c75278eca7b78803 vcs=git   worktree=/Users/willemvanheemstra/intent/workspaces/yearning-loon/source
+  id=2910647514fcc743d345 vcs=git   worktree=/Users/willemvanheemstra/intent/workspaces/odd-chickadee/pkistars
+  id=d70d4c21e5ba100ce63f vcs=git   worktree=/private/tmp/wave1_fixture_66069/repoA
+
+Parent workspaces/ directory ever registered as project: NO (safe)

@@ -1,0 +1,69 @@
+=== opencode.json inventory under ~/intent/workspaces (depth<=3) ===
+2026-09-21T19:07:33Z
+Format: <md5>  <bytes>  <path>
+
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/alternative-bovid/dev-to/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/close-frog/repo/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/clumsy-scallop/platform/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/coming-mollusk/net-worth/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/developed-ocelot/step-ca/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/enchanting-skink/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/existing-primate/organization/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/extended-jellyfish/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/extended-swordfish/bid-736896435742/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/flexible-seahorse/open-engineering/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/foolish-moth/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/github-oauth/characters/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/gleaming-takin/story-conventions/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/hushed-lungfish/pixstars/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/ill-starfish/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/instant-skunk/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/lets-start/cartoon-hero/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/literary-horse/atlas-idp-virtual-wan/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/neighbouring-chimpanzee/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/noble-ape/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/odd-chickadee/pkistars/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/organic-guppy/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/personal-hawk/home-interior/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/plan-create/augmentcode-intent/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/quarrelsome-dragonfly/repository-conventions/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/rear-loon/biography/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/renewed-mongoose/stories/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/rotten-partridge/income-tax/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/ruling-xerinae/augment-claude-litellm-rtk/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/scientific-puma/architecture-decision-records-management/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/similar-beaver/storyboards/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/sore-harrier/augmentcode-intent/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/splendid-mollusk/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/squealing-viper/styles/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/sunny-reindeer/characters/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/sure-swift/metadata-conventions/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/tender-haddock/agentic-software-engineering-conventions/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/thin-roadrunner/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/unchanged-macaw/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/vicarious-unicorn/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/whole-ladybug/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/worthwhile-wolverine/comic-gen/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/yabbering-asp/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/yearning-loon/source/opencode.json
+60a5e0e2c74bee8f92df53690a69d436  1386  /Users/willemvanheemstra/intent/workspaces/zippy-beetle/website/opencode.json
+63a2fc774406cf685db7d1db3bc34115  1486  /Users/willemvanheemstra/intent/workspaces/fancy-alpaca/source/opencode.json
+694377ad56e44c7b34f651bab7ef784f  151  /Users/willemvanheemstra/intent/workspaces/worldwide-salamander/source/opencode.json
+
+=== Findings ===
+Local repo opencode.json md5: 60a5e0e2c74bee8f92df53690a69d436
+Parent   opencode.json md5: 60a5e0e2c74bee8f92df53690a69d436  (path: /Users/willemvanheemstra/intent/workspaces/opencode.json)
+STATUS: Parent-level opencode.json is BYTE-IDENTICAL to this repo. This is a HAZARD:
+  if opencode is ever launched from ~/intent/workspaces/ the parent config would load,
+  and opencode would enumerate every sibling repo (see rg files probes below).
+  Remediation is out of scope for this task (file is outside repo worktree);
+  captured here for the coordinator to decide.
+
+=== .opencodeignore inventory ===
+(no matches means none exist — consistent with Wave 0 finding)
+
+=== .git roots under ~/intent/workspaces (depth<=3) ===
+Total .git dirs: 0
+None at depth 2 → parent ~/intent/workspaces/ is NOT a git repo (no VCS boundary there).

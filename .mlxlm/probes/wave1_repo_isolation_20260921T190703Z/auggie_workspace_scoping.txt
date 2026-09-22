@@ -1,0 +1,18 @@
+=== auggie CLI evidence: --mcp-auto-workspace + workspace scoping ===
+2026-09-21T19:07:43Z
+                               workspace root that you want to index.
+  --mcp                        Run as MCP tool server
+  -w, --workspace-root <path>  Workspace root (auto-detects git root if absent)
+  --add-workspace <path>       Additional workspace directory to index (repeatable)
+  --discover-workspaces[=depth] Force git-repo discovery under a non-git root; optional depth 1-5 (default 1, use =N for nested owner/repo)
+  --no-discover-workspaces     Disable git-repo auto-discovery entirely
+  --wait-for-indexing          Wait for workspace indexing to complete before codebase retrieval executes
+  --mcp-config <cfg>           MCP server configuration (repeatable)
+  mcp                          Manage MCP servers
+
+Interpretation (aligns with Wave 0):
+- auggie --mcp --mcp-auto-workspace shifts workspace-root decision to the MCP client.
+- With --mcp-auto-workspace, the codebase-retrieval tool requires a directory_path arg per call.
+- opencode passes its own project-root (git-root of cwd) as that directory_path.
+- Therefore: as long as opencode is launched from a per-repo git root, auggie retrieval
+  is bounded to that git root by construction — no ignore file needed.

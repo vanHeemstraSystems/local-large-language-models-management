@@ -1,0 +1,5 @@
+total 9030880
+drwxr-xr-x@ 13 willemvanheemstra  staff         416 Aug 23 23:01 .
+drwxr-x---@  6 willemvanheemstra  staff         192 Aug 23 22:58 ..
+-rw-r--r--@  1 willemvanheemstra  staff        1570 Aug 23 22:58 .gitattributes
+-rw-r--r--@  1 willemvanheemstra  staff         857 Aug 23 22:58 README.md

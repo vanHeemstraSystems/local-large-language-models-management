@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Start mlx_lm.server on 127.0.0.1:8080 with the safety-baseline caps.
+#
+# Uses the persistent venv at ~/.mlxlm/venv (mlx-lm 0.29.1).
+# The startup --model is only a warm default; mlx_lm.server resolves each
+# request's `model` field as either a local path or an HF repo id.
+#
+# Usage:
+#   .mlxlm/serve.sh start    # background start, PID written to .mlxlm/serve.pid
+#   .mlxlm/serve.sh stop     # kill by PID file
+#   .mlxlm/serve.sh status   # ps + /v1/models
+#   .mlxlm/serve.sh log      # tail the log
+
+set -u
+STATE_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOG="$STATE_DIR/mlxlm-serve.log"
+PIDFILE="$STATE_DIR/serve.pid"
+
+HOST=127.0.0.1
+PORT=8080
+MODEL_DIR_ROOT="$HOME/.mlx-serve/models"
+PRIMARY_MODEL="$MODEL_DIR_ROOT/mlx-community/gpt-oss-20b-MXFP4-Q8"
+VENV="$HOME/.mlxlm/venv"
+
+case "${1:-}" in
+  start)
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+      printf 'already running: pid=%s\n' "$(cat "$PIDFILE")"
+      exit 0
+    fi
+    # shellcheck disable=SC1091
+    source "$VENV/bin/activate"
+    nohup python -m mlx_lm server \
+      --host "$HOST" \
+      --port "$PORT" \
+      --model "$PRIMARY_MODEL" \
+      >> "$LOG" 2>&1 &
+    echo $! > "$PIDFILE"
+    printf 'started: pid=%s log=%s\n' "$(cat "$PIDFILE")" "$LOG"
+    ;;
+  stop)
+    if [ -f "$PIDFILE" ]; then
+      PID=$(cat "$PIDFILE")
+      kill "$PID" 2>/dev/null && printf 'stopped: pid=%s\n' "$PID"
+      rm -f "$PIDFILE"
+    else
+      printf 'no pid file\n'
+    fi
+    ;;
+  status)
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+      ps -o pid,rss,command -p "$(cat "$PIDFILE")"
+    else
+      printf 'not running\n'
+    fi
+    printf '\n--- /v1/models ---\n'
+    curl -sS -m 3 "http://$HOST:$PORT/v1/models" 2>&1 | head -c 800
+    printf '\n'
+    ;;
+  log)
+    tail -80 "$LOG"
+    ;;
+  *)
+    printf 'usage: %s {start|stop|status|log}\n' "$0"
+    exit 2
+    ;;
+esac

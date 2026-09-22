@@ -1,0 +1,12 @@
+opencode-single-repo: refusing to launch opencode from the workspaces parent directory:
+opencode-single-repo:   cwd = /Users/willemvanheemstra/intent/workspaces
+opencode-single-repo: 
+opencode-single-repo: That directory is not a per-repository git worktree. Any opencode.json
+opencode-single-repo: placed there is picked up by opencode and shared across every
+opencode-single-repo: workspace beneath it, letting a single session read across multiple
+opencode-single-repo: repositories.
+opencode-single-repo: 
+opencode-single-repo: Remediation: cd into the specific repository you want to work on,
+opencode-single-repo: then re-run this wrapper. Example:
+opencode-single-repo:   cd /Users/willemvanheemstra/intent/workspaces/<workspace>/<repo>
+opencode-single-repo:   opencode-single-repo.sh

@@ -1,0 +1,115 @@
+=== Disposable fixture layout ===
+Fixture root: /tmp/wave1_fixture_66069
+/tmp/wave1_fixture_66069/repoA/.git/COMMIT_EDITMSG
+/tmp/wave1_fixture_66069/repoA/.git/HEAD
+/tmp/wave1_fixture_66069/repoA/.git/config
+/tmp/wave1_fixture_66069/repoA/.git/description
+/tmp/wave1_fixture_66069/repoA/.git/index
+/tmp/wave1_fixture_66069/repoA/.git/opencode
+/tmp/wave1_fixture_66069/repoA/README.md
+/tmp/wave1_fixture_66069/repoA/src/a.py
+/tmp/wave1_fixture_66069/repoB/.git/COMMIT_EDITMSG
+/tmp/wave1_fixture_66069/repoB/.git/HEAD
+/tmp/wave1_fixture_66069/repoB/.git/config
+/tmp/wave1_fixture_66069/repoB/.git/description
+/tmp/wave1_fixture_66069/repoB/.git/index
+/tmp/wave1_fixture_66069/repoB/README.md
+/tmp/wave1_fixture_66069/repoB/src/b.py
+
+----- P0a rg files from repoA (git root) ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+src/a.py
+README.md
+
+----- P0b rg files from parent (no .git, no ignore) ----- (cwd=/tmp/wave1_fixture_66069)
+repoB/src/b.py
+repoB/README.md
+repoA/src/a.py
+repoA/README.md
+
+----- P0c file list from repoA (.) ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+[
+  {
+    "path": ".git/",
+    "type": "directory"
+  },
+  {
+    "path": "src/",
+    "type": "directory"
+  },
+  {
+    "path": "README.md",
+    "type": "file"
+  }
+]
+
+----- P0d file list from parent — sibling escape attempt ----- (cwd=/tmp/wave1_fixture_66069)
+[91m[1mError: [0mUnexpected error
+
+Path escapes the location
+
+----- P0e file search README from repoA ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+README.md
+
+----- P0f file search README from parent ----- (cwd=/tmp/wave1_fixture_66069)
+repoA/README.md
+repoB/README.md
+
+----- P1 .opencodeignore at parent, rg files from parent ----- (cwd=/tmp/wave1_fixture_66069)
+repoB/src/b.py
+repoB/README.md
+.opencodeignore
+repoA/src/a.py
+repoA/README.md
+
+----- P1b .opencodeignore at parent, rg files from repoA (unaffected) ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+src/a.py
+README.md
+
+----- P2 .ignore at parent, rg files from parent ----- (cwd=/tmp/wave1_fixture_66069)
+repoB/src/b.py
+repoB/README.md
+.ignore
+repoA/src/a.py
+repoA/README.md
+
+----- P3 .gitignore at parent (no parent .git), rg files from parent ----- (cwd=/tmp/wave1_fixture_66069)
+.gitignore
+repoB/src/b.py
+repoB/README.md
+repoA/src/a.py
+repoA/README.md
+
+----- P4 .gitignore + .git at parent, rg files from parent ----- (cwd=/tmp/wave1_fixture_66069)
+.gitignore
+repoB/src/b.py
+repoB/README.md
+repoA/src/a.py
+repoA/README.md
+
+----- P5 .rgignore at parent, rg files from parent ----- (cwd=/tmp/wave1_fixture_66069)
+repoB/src/b.py
+repoB/README.md
+.rgignore
+repoA/src/a.py
+repoA/README.md
+
+----- P6 repoA/.gitignore (src/), rg files from repoA ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+src/a.py
+.gitignore
+README.md
+
+----- P7 repoA/.ignore (src/), rg files from repoA ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+src/a.py
+README.md
+.ignore
+
+----- P8 repoA/.opencodeignore (src/), rg files from repoA ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+src/a.py
+README.md
+.opencodeignore
+
+----- P9 repoA/.rgignore (src/), rg files from repoA ----- (cwd=/tmp/wave1_fixture_66069/repoA)
+src/a.py
+README.md
+.rgignore
+

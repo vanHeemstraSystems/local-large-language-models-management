@@ -1,0 +1,4 @@
+log_offset_before_all=   39774
+log_offset_before_probes=   41768
+log_offset_after_probes=   44735
+log_offset_end=   45231

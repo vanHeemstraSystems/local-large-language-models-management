@@ -1,0 +1,2 @@
+{"scenario":"s1_repo_root","cwd":"/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management","argc":4,"argv":["--model","qwen3-8b","--flag","s1_repo_root arg"]}
+{"scenario":"s2_repo_subdir","cwd":"/Users/willemvanheemstra/intent/workspaces/favourite-coyote/local-large-language-models-management","argc":4,"argv":["--model","qwen3-8b","--flag","s2_repo_subdir arg"]}
