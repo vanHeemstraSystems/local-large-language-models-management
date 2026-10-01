@@ -1,6 +1,6 @@
-Memo: Evaluate Herdr for Local LLM Agent Sessions
+# Memo 14: Evaluate Herdr for Local LLM Agent Sessions
 
-Objective
+## Objective
 
 Evaluate whether Herdr can be incorporated into Local LLMs Management as a persistent execution/session layer for coding agents using local LLMs.
 
@@ -17,7 +17,7 @@ Herdr should not become the LLM runtime or model-selection layer. Its proposed r
 
 ⸻
 
-References
+## References
 
 * Herdr: https://herdr.dev/
 * Herdr documentation: https://herdr.dev/docs/
@@ -30,12 +30,12 @@ References
 
 ⸻
 
-Concept
+## Concept
 
 Herdr provides a persistent environment in which coding-agent sessions can continue running independently of the user’s interactive terminal or editor connection.
 
 The architectural distinction should be:
-
+```
                  Human Interface
                        │
                  Warp / iPad
@@ -63,7 +63,7 @@ The architectural distinction should be:
                  └─────┬─────┘
                        │
                  Qwen3-Coder
-
+```
 Herdr therefore complements rather than replaces:
 
 * MLXServe
