@@ -1,4 +1,4 @@
-Memo: OpenCode Go with Kimi K3
+## Memo 17: OpenCode Go with Kimi K3
 
 Status: Proposed
 Date: 2026-10-06
