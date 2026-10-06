@@ -101,7 +101,15 @@ Full billing/credits walkthrough, including a fully-local zero-cost mode that di
 
 ## Client contenders
 
-Pi (`@earendil-works/pi-coding-agent`, user-level `npm install -g --ignore-scripts`, uninstall with `npm uninstall -g @earendil-works/pi-coding-agent`) is kept on hand as a TRIAL alternative to OpenCode for the local `mlx-lm.server` stack. On the identical greet-edit fixture (Wave 3d, `.mlxlm/probes/pi_20261006T215814Z_nothink/`), Pi's first-turn envelope measured 851 prompt tokens against OpenCode's 8,463 (~10× leaner), completing in 9 s / 4 turns with the file written correctly; without the Qwen3 `/no_think` convention appended to the prompt, Pi stalls in reasoning and is killed by the 5-minute wall. Pi is not promoted to the default client — OpenCode retains plan mode, permissions, LSP feedback, and Herdr integration — but it is retained for context-starved tasks where the ~7.6 K-token saving matters on the 16 K cap; adoption would require a per-model Pi config (or system-prompt append) that disables Qwen3 thinking without user action.
+OpenCode remains the default client against the local `mlx-lm.server` stack. The following three alternatives were evaluated in Waves 3 / 3b / 3d and are kept on hand with the verdicts recorded below.
+
+| Client | Verdict | One-line rationale |
+|---|---|---|
+| Herdr 0.9.3 | TRIAL / KEEP AS ALTERNATIVE | 7/8 memo-14 checks pass; in-flight process does not survive a Herdr server restart. |
+| Magnitude 0.2.6 | KEEP AS ALTERNATIVE (scoped) | API/tool-protocol parity with mlx-lm 0.31.3; memo-9 null-id bug did not reproduce; quality/speed excluded. |
+| Pi 1.0.4 | TRIAL | 851 vs 8,463 first-turn prompt tokens on the same task; needs per-model thinking-off before promotion. |
+
+Pi install/uninstall (user-level, no sudo): `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`; uninstall with `npm uninstall -g @earendil-works/pi-coding-agent`. Adoption of Pi as a default would require a per-model Pi config (or system-prompt append) that disables Qwen3 thinking without user action; without the `/no_think` convention appended to the prompt, Pi stalls in reasoning and is killed by the 5-minute wall.
 
 ## Safety envelope
 

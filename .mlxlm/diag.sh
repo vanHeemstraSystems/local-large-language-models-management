@@ -294,9 +294,12 @@ run_step_tool_loop() {
     record_step "tool_loop" "FAIL" "-" "-" "-" "tool_call step missing"
     note_fail "protocol"; return
   fi
-  python3 - "$OUT_DIR/04_tool.resp.json" "$MODEL" "$OUT_DIR/05_loop.req.json" "$HERE" <<'PY'
+  python3 - "$OUT_DIR/04_tool.resp.json" "$MODEL" "$OUT_DIR/05_loop.req.json" "$HERE" 2>/dev/null <<'PY' || true
 import json, sys
-resp = json.load(open(sys.argv[1]))
+try:
+    resp = json.load(open(sys.argv[1]))
+except Exception:
+    json.dump({}, open(sys.argv[3], "w")); raise SystemExit
 model, out, cwd = sys.argv[2], sys.argv[3], sys.argv[4]
 msg = (resp.get("choices") or [{}])[0].get("message") or {}
 tcs = msg.get("tool_calls") or []

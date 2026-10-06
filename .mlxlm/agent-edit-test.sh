@@ -141,7 +141,7 @@ content = None; file_ok = False
 if os.path.exists(fixture):
     with open(fixture, 'rb') as f:
         content = f.read().decode('utf-8', errors='replace')
-    file_ok = content in ("hello\nworld\n", "hello world\n")
+    file_ok = content == "hello\nworld\n"
 tool_discovery  = any(is_edit(t) for t in tools)
 tool_emission   = any(is_edit(t) and t.get("status") == "completed" for t in tools)
 result_handling = tool_emission and file_ok

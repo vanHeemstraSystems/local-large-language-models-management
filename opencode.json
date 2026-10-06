@@ -2,7 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "mlxlm//Users/willemvanheemstra/.mlx-serve/models/mlx-community/Qwen3-8B-4bit",
   "enabled_providers": [
-    "mlxlm"
+    "mlxlm",
+    "opencode-go"
   ],
   "mcp": {
     "augment-context-engine": {
@@ -12,6 +13,11 @@
         "--mcp",
         "--mcp-auto-workspace"
       ],
+      "enabled": true
+    },
+    "composio": {
+      "type": "remote",
+      "url": "https://connect.composio.dev/mcp",
       "enabled": true
     }
   },
@@ -25,12 +31,28 @@
     "max_lines": 200,
     "max_bytes": 16384
   },
+  "default_agent": "local",
   "agent": {
     "title": {
       "disable": true
     },
     "summary": {
       "disable": true
+    },
+    "local": {
+      "description": "Local-model agent (Qwen3-8B-4bit via mlx-lm) with Composio MCP tools disabled so the first-turn prompt stays within the 16K context window.",
+      "mode": "primary",
+      "permission": {
+        "composio_*": "deny"
+      }
+    },
+    "escalation": {
+      "description": "Escalation agent (Kimi K3 via opencode-go) with full Composio MCP tool access for tasks that need the Composio tool manifest.",
+      "mode": "primary",
+      "model": "opencode-go/kimi-k3",
+      "permission": {
+        "composio_*": "allow"
+      }
     }
   },
   "provider": {
@@ -55,6 +77,13 @@
             "context": 16384,
             "output": 1536
           }
+        }
+      }
+    },
+    "opencode-go": {
+      "models": {
+        "kimi-k3": {
+          "name": "Kimi K3 (escalation)"
         }
       }
     }
