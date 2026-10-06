@@ -99,6 +99,18 @@ The Intent by Augment desktop app supports **Bring Your Own Agent**. Create a ne
 
 Full billing/credits walkthrough, including a fully-local zero-cost mode that disables the Context Engine MCP, is in [QUICKSTART.md → Billing & credits](QUICKSTART.md#billing--credits).
 
+## Client contenders
+
+OpenCode remains the default client against the local `mlx-lm.server` stack. The following three alternatives were evaluated in Waves 3 / 3b / 3d and are kept on hand with the verdicts recorded below.
+
+| Client | Verdict | One-line rationale |
+|---|---|---|
+| Herdr 0.9.3 | TRIAL / KEEP AS ALTERNATIVE | 7/8 memo-14 checks pass; in-flight process does not survive a Herdr server restart. |
+| Magnitude 0.2.6 | KEEP AS ALTERNATIVE (scoped) | API/tool-protocol parity with mlx-lm 0.31.3; memo-9 null-id bug did not reproduce; quality/speed excluded. |
+| Pi 1.0.4 | TRIAL | 851 vs 8,463 first-turn prompt tokens on the same task; needs per-model thinking-off before promotion. |
+
+Pi install/uninstall (user-level, no sudo): `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`; uninstall with `npm uninstall -g @earendil-works/pi-coding-agent`. Adoption of Pi as a default would require a per-model Pi config (or system-prompt append) that disables Qwen3 thinking without user action; without the `/no_think` convention appended to the prompt, Pi stalls in reasoning and is killed by the 5-minute wall.
+
 ## Safety envelope
 
 Governing principle: **machine stability outranks maximizing resident model memory or context capacity** (see `STRATEGY.md` for the full statement and the 2026-08-17 kernel-panic incident that motivated it).

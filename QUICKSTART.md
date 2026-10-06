@@ -143,6 +143,143 @@ Expected: P1, P2, P4 exit 0 with `finish=stop`; P3 exits 0 with `finish=length` 
 .mlxlm/serve.sh stop
 ```
 
+## Diagnostics
+
+One command to exercise the full local coding stack against a running `mlx-lm.server` and get a PASS/FAIL table with timing telemetry (memo 11 §14, current stack).
+
+```sh
+.mlxlm/serve.sh start
+bash .mlxlm/diag.sh
+```
+
+The ladder runs six short, sequential steps and prints one row per step:
+
+| Step | What it exercises | Fails when the problem is in… |
+| --- | --- | --- |
+| health | `.mlxlm/health.sh` (venv versions, `/v1/models`, server RSS vs 18 GB cap) | server |
+| basic | 1-sentence non-streaming completion | server |
+| stream | short streaming completion; records TTFT and max inter-chunk gap | protocol |
+| tool_call | single `get_current_directory` tool call, non-streaming | protocol |
+| tool_loop | two-step tool loop: tool_call → tool result → final text answer | protocol |
+| longctx | ~8K-token prompt with a short reply (bounded, below the 16K ceiling) | context |
+
+Reading the table: `ttft(s)` is the wall-clock time to the first streamed content chunk (populated for `stream` only); `tok/s` is `completion_tokens` divided by elapsed generation time (approximate for non-streaming steps that cannot separate prefill from decode); `p_tok` is the server-reported `prompt_tokens`.
+
+The server-side prompt cache is capped via two env vars read by `.mlxlm/serve.sh` and passed through to `mlx_lm.server`:
+
+- `MLXLM_PROMPT_CACHE_BYTES` (default `6442450944`, 6 GB) → `--prompt-cache-bytes`.
+- `MLXLM_PROMPT_CACHE_SIZE` (default `4`) → `--prompt-cache-size` (number of distinct sequences).
+
+`.mlxlm/health.sh` reads the first variable and FAILs if the most recent `Prompt Cache: N sequences, X GB` line in `.mlxlm/mlxlm-serve.log` exceeds that cap by more than 10%.
+
+On any failure, the final line names the first failing layer:
+
+```
+Likely failure domain: server | protocol | context
+```
+
+Exit code is 0 when all steps PASS and 1 otherwise. Raw per-step request bodies, responses, metrics (`NN_step.metrics.json`), a `summary.json`, and a server-log excerpt (`server_log_excerpt.log`) are written to `.mlxlm/probes/diag_<UTC-timestamp>/` (gitignored via `.mlxlm/`). The ladder is short and sequential by design — do not use it as a stress loop.
+
+## Agentic edits with the local model
+
+The diag ladder proves the server and tool-call protocol work; it does not prove that OpenCode can drive the local Qwen3-8B-4bit through a complete read → edit → verify cycle on a real file. The scripted acceptance test does:
+
+```sh
+.mlxlm/agent-edit-test.sh                      # default local model
+.mlxlm/agent-edit-test.sh -m opencode-go/kimi-k3   # one-off comparison
+```
+
+It creates `.mlxlm/probes/agentedit_<ts>/greet.txt` (`hello\n`), runs `opencode run --format json` with a fixed prompt that asks the model to append `world` after `hello` and read the file back, bounds the run at 5 min / 15 OpenCode steps / any new `[METAL]` line in the server log, and prints a per-layer table (`tool_discovery`, `tool_call_emission`, `result_handling`, `interpretation_verification`, `natural_stop`) plus wall time, step count, and the first-turn envelope token count from `step_finish`. The file-content check accepts either `hello\nworld\n` or `hello world\n` — both are faithful interpretations of the prompt — and FAILs on anything else. Exit code is 0 on PASS, 1 on FAIL, 2 on usage. One `route-log.sh` entry is appended per run.
+
+What works today (four local runs on 2026-10-06): under the exact-match file check (`hello\nworld\n`), **2 of 4 passed** — one failing run wrote one-line `hello world` (which fails the exact check), and one failing run called the Edit tool with a hallucinated path (`/path/to/greet.txt`). The passing runs were 2 steps, 46–54 s, envelope ≈6.56K tokens; the failing fourth run had an 8,463-token envelope (cause of the envelope variation undetermined).
+
+## Routing telemetry
+
+Record one JSON line per task so local-vs-cloud escalation decisions become measurable before any automated router is considered (memo 12 §6, memo 16 §14). The log lives at `.mlxlm/routing/decisions.jsonl` and is gitignored via the existing `.mlxlm/` rule. No automation, no external calls — append by hand or from a wrapper script when a task finishes.
+
+Append a record:
+
+```sh
+scripts/route-log.sh add --category small-edit --model qwen3-8b-4bit \
+  --outcome completed --duration 42 --notes "renamed one symbol"
+```
+
+Record a local timeout that was escalated to a cloud model:
+
+```sh
+scripts/route-log.sh add --category multi-file --model qwen3-8b-4bit \
+  --outcome timeout --escalated --escalated-to kimi-k3 --duration 310
+```
+
+`--outcome` must be one of `completed | timeout | tool_failure | tests_failed | context_overflow`. The script is Bash 3.2-compatible and uses `jq` only when it is already installed; otherwise it falls back to plain `printf`.
+
+Review per-model success/timeout/escalation counts:
+
+```sh
+scripts/route-log.sh summary
+```
+
+## Escalating to a cloud model
+
+Qwen3-8B-4bit stays the default. Escalate to a subscribed cloud model only when the local run hits one of the STRATEGY.md escalation triggers (repeated tool-loop failures, context overflow on a task that cannot be scoped down, or a reasoning depth the 16,384-token / 1,536-output envelope cannot support — see STRATEGY.md's session lifecycle and routing policy).
+
+Prerequisite (one-time, performed outside this guide): subscribe to **OpenCode Go** and run `opencode auth login` to store the credential in `~/.local/share/opencode/auth.json`. Nothing secret is written to this repo. `opencode.json` enables the `opencode-go` provider and exposes `Kimi K3 (escalation)` as the only cloud model.
+
+Switch inside a running OpenCode session:
+
+1. Type `/models` and select `opencode-go / Kimi K3 (escalation)`. The top-level default in `opencode.json` is unchanged, so the switch applies to the current session only.
+2. Run the one escalation prompt. Keep the exchange narrow — pass only the files and quotes the local model could not resolve.
+3. Type `/models` again and reselect the local `mlxlm / Qwen3 8B 4-bit (fallback)` entry to return to zero-cost local inference for the next prompt.
+4. Append a routing-telemetry line so the escalation is measurable: `scripts/route-log.sh add --category <category> --model qwen3-8b-4bit --outcome <outcome> --escalated --escalated-to kimi-k3 --duration <seconds>`.
+
+**Included usage limits.** OpenCode Go is a flat-rate subscription that includes a fixed monthly token allowance for Kimi K3 (see memo17 §3; current rate per the user's plan: Kimi K3 ≈ $15/month included). Re-check the live limit on the OpenCode Go billing page (`opencode.ai/auth` → account) before planning a batch of escalations; the subscription page is the source of truth, not this file. Do not enable Extra Usage.
+
+## Composio (external actions)
+
+Composio is **enabled by default** in this repo (`mcp.composio.enabled=true` in `opencode.json`; user decision 2026-10-06). With the Composio MCP attached and no per-agent filter, the first-turn envelope measures ≈14.6–15.2K of the 16,384 local context, so the operating rule is enforced in config via two primary agents in `opencode.json`: the default **`local`** agent (Qwen3-8B-4bit, `permission.composio_*: deny`) keeps Composio tools out of the manifest — measured first-turn envelope ≈6.5K — and the **`escalation`** agent (`opencode-go/kimi-k3`, `permission.composio_*: allow`) is used when a session needs Composio tools; switch between them with Tab in the TUI or `--agent escalation` on `opencode run`. The 2026-10-06 read-only PoC still stands as the worst-case data point — a +6,768-token tool-manifest envelope drove the prompt cache to 11.42 GB and triggered a Metal `kIOGPUCommandBufferCallbackErrorOutOfMemory` on this 24 GB machine; the server's `--prompt-cache-bytes` 6 GB cap now bounds that failure mode.
+
+Composio Connect, when enabled, attaches as an MCP server so OpenCode can call external applications (initially GitHub, read-only) through a single OAuth-managed endpoint. Model inference stays local; only the tool-call envelope and any returned payload transit Composio's cloud (STRATEGY.md Decisions, 2026-10-06).
+
+Configuration lives in `opencode.json` alongside `augment-context-engine`:
+
+```json
+"composio": {
+  "type": "remote",
+  "url": "https://connect.composio.dev/mcp",
+  "enabled": false
+}
+```
+
+OpenCode 1.18.31 auto-detects the OAuth flow on first use; manually trigger or inspect it with:
+
+```sh
+opencode mcp auth composio    # one-time browser sign-in to Composio
+opencode mcp list             # confirm status
+opencode mcp debug composio   # inspect connection / OAuth discovery
+```
+
+After Composio sign-in, authorize **one** application (GitHub) through Composio's connected-apps browser flow. Follow memo 8 §11 (least privilege): one agent, one connection, one application, minimum permissions; expand only after validation.
+
+**Action-class policy (STRATEGY.md "Action classes (memo 8 §9)").** Every Composio-mediated call is classified before execution:
+
+- **Class A — Read** (search, inspect, list, retrieve, summarize, query): executes without additional confirmation.
+- **Class B — Reversible write** (create a draft, open an issue, add a comment, create a branch): `propose → approve → execute`.
+- **Class C — High-consequence / destructive / external communication** (delete, merge, publish, send, deploy, transfer, change permissions, modify credentials, remove infrastructure): `explain → approve → execute → verify`; never autonomous without a separately approved, narrowly scoped automation.
+
+The initial PoC is **Class A only** — refuse or skip any write.
+
+**Credential rule.** Composio owns authentication to external systems; the local model never sees application tokens. Credentials (Composio tokens, GitHub OAuth tokens, any derived bearer) MUST NOT be:
+
+- embedded in prompts or copied into the chat;
+- committed to Git or any tracked file (`opencode.json` included);
+- written into skills, notes, or repository documentation;
+- supplied as local-model context;
+- printed in logs or server-log excerpts (redact before saving under `.mlxlm/probes/`).
+
+OAuth tokens issued by `opencode mcp auth` are stored under `~/.local/share/opencode/mcp-auth.json`, outside the repo. Remove them with `opencode mcp logout composio` when a connection is retired.
+
+**Controlled-write outcome (2026-10-06, task DoD).** Phase 4 of memo 8 was executed end-to-end on `opencode-go/kimi-k3` in a single OpenCode session across 3 turns: proposal → re-authorization link → write. The user approval was delivered as a distinct session turn after the proposal, and `GITHUB_CREATE_AN_ISSUE` was called exactly once; the model then read the issue back via `GITHUB_GET_AN_ISSUE`. Issue [#13](https://github.com/vanHeemstraSystems/local-large-language-models-management/issues/13) ("Composio integration verification") was created at 22:26:53Z and closed by the user at 22:29:38Z. First-turn prompt tokens 14,588 (proposal); 1,208 at the final step of the write turn. `.mlxlm/health.sh` PASS before and after; METAL log-line count 7 → 7 (delta 0).
+
 ## Coding with Warp
 
 Day-to-day coding from Warp uses two terminal tabs and one focused OpenCode session at a time. Treat Warp as a plain terminal with tabs — no other Warp features are assumed.
