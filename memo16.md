@@ -1,4 +1,4 @@
-Memo: Kimi Integration with OpenCode
+# Memo 16: Kimi Integration with OpenCode
 
 Status: Proposed
 Repository: Local LLMs Management
