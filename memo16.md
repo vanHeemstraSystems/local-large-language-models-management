@@ -1,13 +1,17 @@
 # Memo 16: Kimi Integration with OpenCode
 
-Status: Proposed
-Repository: Local LLMs Management
-Date: 2026-10-06
-Decision: Add Kimi as a subscription-based cloud escalation provider for OpenCode; do not replace the local Qwen model and do not use the pay-per-token Moonshot API for the default workflow.
+## Status: 
+Proposed
+## Repository: 
+Local LLMs Management
+## Date: 
+2026-10-06
+## Decision: 
+Add Kimi as a subscription-based cloud escalation provider for OpenCode; do not replace the local Qwen model and do not use the pay-per-token Moonshot API for the default workflow.
 
 ⸻
 
-1. Context
+## 1. Context
 
 Local LLMs Management is being developed around a cost-conscious model-routing strategy:
 
@@ -27,14 +31,14 @@ Kimi provides an attractive cloud escalation tier because Kimi coding models can
 
 ⸻
 
-2. Decision
+## 2. Decision
 
 Integrate Kimi through OpenCode’s subscription-based offering as a cloud model provider.
 
 Do not make Kimi the default model.
 
 The preferred architecture is:
-
+```
                          OpenCode
                             │
                     Model Routing Layer
@@ -49,12 +53,12 @@ The preferred architecture is:
           └─────────────────┼──────────────────┘
                             │
                       Coding result
-
+```
 OpenCode remains the agent. Qwen and Kimi are models available to that agent.
 
 ⸻
 
-3. Why Kimi
+## 3. Why Kimi
 
 Kimi is useful as an escalation tier because it provides access to strong coding models without requiring the Local LLMs Management architecture to abandon local inference.
 
@@ -68,7 +72,7 @@ This keeps the architecture provider-neutral and allows Local LLMs Management to
 
 ⸻
 
-4. Subscription versus pay-per-token
+## 4. Subscription versus pay-per-token
 
 The Moonshot Open Platform API provides pay-per-token access to Kimi models.
 
@@ -79,7 +83,7 @@ The preferred route is subscription-based access through OpenCode’s supported 
 This aligns with the project’s objective of making AI expenditure predictable while reducing unnecessary per-token expenditure.
 
 Therefore:
-
+```
 Preferred:
 OpenCode
    │
@@ -92,15 +96,15 @@ OpenCode
    └── Moonshot API
           │
           └── pay-per-token Kimi
-
+```
 The pay-per-token API can remain a potential future option for specialised workloads, but should not become the normal escalation path.
 
 ⸻
 
-5. Proposed model hierarchy
+## 5. Proposed model hierarchy
 
 The initial routing hierarchy should be:
-
+```
                     Coding task
                          │
                          ▼
@@ -126,12 +130,12 @@ The initial routing hierarchy should be:
                                      │
                                      ▼
                                 Human review
-
+```
 The exact model ordering should remain configurable rather than hard-coded.
 
 ⸻
 
-6. Local-first principle
+## 6. Local-first principle
 
 The existence of a strong cloud model must not undermine the local-first objective.
 
@@ -150,13 +154,13 @@ Kimi should therefore be considered an escalation mechanism, not a replacement.
 
 ⸻
 
-7. Escalation triggers
+## 7. Escalation triggers
 
 Local LLMs Management should eventually be able to escalate from Qwen to Kimi based on measurable conditions.
 
 Potential triggers include:
 
-Capability
+### Capability
 
 The task requires capabilities beyond the locally available model.
 
@@ -168,7 +172,7 @@ Examples:
 * large repository comprehension;
 * tasks requiring stronger coding/reasoning performance.
 
-Runtime failure
+### Runtime failure
 
 Examples:
 
@@ -179,7 +183,7 @@ Examples:
 * context-length failure;
 * insufficient output capacity.
 
-Quality failure
+### Quality failure
 
 Examples:
 
@@ -189,7 +193,7 @@ Examples:
 * model enters an unproductive loop;
 * repository validation rejects the result.
 
-Resource constraints
+### Resource constraints
 
 Examples:
 
@@ -199,12 +203,12 @@ Examples:
 
 ⸻
 
-8. Kimi should not hide local-model failures
+## 8. Kimi should not hide local-model failures
 
 An important architectural principle is that escalation should not simply conceal problems with the local stack.
 
 For example:
-
+```
 Qwen timeout
     │
     ├── record failure
@@ -212,7 +216,7 @@ Qwen timeout
     ├── collect diagnostics
     │
     └── escalate to Kimi
-
+```
 This allows Local LLMs Management to continuously improve the local environment.
 
 The goal is therefore:
@@ -221,17 +225,17 @@ Use Kimi to keep the coding workflow productive while using every escalation to 
 
 ⸻
 
-9. Relationship with Jev
+## 9. Relationship with Jev
 
 This integration provides a concrete target for the planned model-selection layer.
 
 Jev can eventually evaluate a task and select between:
-
+```
 Qwen local
 Kimi coding model
 Kimi higher-capability model
 Human review
-
+```
 The routing decision could consider:
 
 * task complexity;
@@ -250,8 +254,8 @@ The router should return a model-selection decision, rather than directly implem
 
 ⸻
 
-10. Recommended future architecture
-
+## 10. Recommended future architecture
+```
                          User
                            │
                            ▼
@@ -280,17 +284,17 @@ The router should return a model-selection decision, rather than directly implem
                                          │
                                          ▼
                                   Human review
-
+```
 This architecture keeps model selection separate from coding orchestration and validation.
 
 ⸻
 
-11. OpenCode configuration
+## 11. OpenCode configuration
 
 OpenCode provides provider authentication and model selection.
 
 The intended operational flow is:
-
+```
 opencode auth login
         │
         ▼
@@ -304,16 +308,16 @@ opencode
         │
         ▼
 /models
-
+```
 The exact model availability should be checked against the active OpenCode subscription because model availability and usage allowances can change over time.
 
 ⸻
 
-12. Important distinction
+## 12. Important distinction
 
 Kimi should not be treated as another agent in the architecture.
 
-Agent
+### Agent
 
 OpenCode
 
@@ -326,7 +330,7 @@ Responsible for:
 * running tests;
 * managing the coding session.
 
-Models
+### Models
 
 Examples:
 
@@ -344,7 +348,7 @@ This separation is important because it allows the model-routing layer to evolve
 
 ⸻
 
-13. Cost policy
+## 13. Cost policy
 
 The preferred cost policy is:
 
@@ -359,7 +363,7 @@ Any future pay-per-token provider should require an explicit routing policy befo
 
 ⸻
 
-14. Metrics
+## 14. Metrics
 
 Local LLMs Management should record model-routing metrics.
 
@@ -383,7 +387,7 @@ This will allow the routing strategy to evolve based on evidence rather than int
 
 ⸻
 
-15. Success criteria
+## 15. Success criteria
 
 The Kimi integration is successful if:
 
@@ -398,7 +402,7 @@ The Kimi integration is successful if:
 
 ⸻
 
-16. Architectural principle
+## 16. Architectural principle
 
 The resulting principle for Local LLMs Management is:
 
@@ -410,33 +414,33 @@ OpenCode orchestrates. Qwen executes locally by default. Kimi provides subscribe
 
 ⸻
 
-References
+## References
 
-OpenCode — Providers
+### OpenCode — Providers
 
 OpenCode documentation describing provider configuration and model selection:
 
 https://opencode.ai/docs/providers/
 
-OpenCode — Go
+### OpenCode — Go
 
 OpenCode documentation for the subscription-based Go offering and its supported models:
 
 https://dev.opencode.ai/docs/go/
 
-OpenCode
+### OpenCode
 
 Official OpenCode project:
 
 https://opencode.ai/
 
-Moonshot AI / Kimi
+### Moonshot AI / Kimi
 
 Official Kimi platform documentation for Kimi models and API access:
 
 https://platform.moonshot.ai/
 
-Kimi
+### Kimi
 
 Official Kimi website:
 
@@ -444,7 +448,7 @@ https://www.kimi.com/
 
 ⸻
 
-Related Local LLMs Management work
+## Related Local LLMs Management work
 
 This memo should be considered together with:
 
