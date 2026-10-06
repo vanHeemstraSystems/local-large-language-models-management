@@ -1,6 +1,7 @@
 ## Memo 17: OpenCode Go with Kimi K3
 
-Status: Proposed
+## Status: 
+Proposed
 Date: 2026-10-06
 Target: Local LLMs Management
 Decision area: Hosted model escalation / OpenCode integration
