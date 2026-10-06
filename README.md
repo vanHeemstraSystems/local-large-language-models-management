@@ -99,6 +99,10 @@ The Intent by Augment desktop app supports **Bring Your Own Agent**. Create a ne
 
 Full billing/credits walkthrough, including a fully-local zero-cost mode that disables the Context Engine MCP, is in [QUICKSTART.md → Billing & credits](QUICKSTART.md#billing--credits).
 
+## Client contenders
+
+Pi (`@earendil-works/pi-coding-agent`, user-level `npm install -g --ignore-scripts`, uninstall with `npm uninstall -g @earendil-works/pi-coding-agent`) is kept on hand as a TRIAL alternative to OpenCode for the local `mlx-lm.server` stack. On the identical greet-edit fixture (Wave 3d, `.mlxlm/probes/pi_20261006T215814Z_nothink/`), Pi's first-turn envelope measured 851 prompt tokens against OpenCode's 8,463 (~10× leaner), completing in 9 s / 4 turns with the file written correctly; without the Qwen3 `/no_think` convention appended to the prompt, Pi stalls in reasoning and is killed by the 5-minute wall. Pi is not promoted to the default client — OpenCode retains plan mode, permissions, LSP feedback, and Herdr integration — but it is retained for context-starved tasks where the ~7.6 K-token saving matters on the 16 K cap; adoption would require a per-model Pi config (or system-prompt append) that disables Qwen3 thinking without user action.
+
 ## Safety envelope
 
 Governing principle: **machine stability outranks maximizing resident model memory or context capacity** (see `STRATEGY.md` for the full statement and the 2026-08-17 kernel-panic incident that motivated it).

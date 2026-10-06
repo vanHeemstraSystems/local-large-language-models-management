@@ -28,6 +28,11 @@ PORT=8080
 MODEL_DIR_ROOT="$HOME/.mlx-serve/models"
 VENV="$HOME/.mlxlm/venv"
 
+# Server-side prompt-cache caps (mlx-lm 0.31.3 --prompt-cache-bytes / --prompt-cache-size).
+# Defaults: 6 GB (6,442,450,944 bytes) and 4 sequences. Overridable via env vars.
+PROMPT_CACHE_BYTES="${MLXLM_PROMPT_CACHE_BYTES:-6442450944}"
+PROMPT_CACHE_SIZE="${MLXLM_PROMPT_CACHE_SIZE:-4}"
+
 # Bash 3.2-compatible model registry (no associative arrays).
 resolve_model() {
   case "$1" in
@@ -68,10 +73,13 @@ case "${1:-}" in
       --host "$HOST" \
       --port "$PORT" \
       --model "$PRIMARY_MODEL" \
+      --prompt-cache-bytes "$PROMPT_CACHE_BYTES" \
+      --prompt-cache-size "$PROMPT_CACHE_SIZE" \
       >> "$LOG" 2>&1 &
     echo $! > "$PIDFILE"
-    printf 'started: pid=%s alias=%s model=%s log=%s\n' \
-      "$(cat "$PIDFILE")" "$SELECTED_ALIAS" "$PRIMARY_MODEL" "$LOG"
+    printf 'started: pid=%s alias=%s model=%s log=%s prompt_cache_bytes=%s prompt_cache_size=%s\n' \
+      "$(cat "$PIDFILE")" "$SELECTED_ALIAS" "$PRIMARY_MODEL" "$LOG" \
+      "$PROMPT_CACHE_BYTES" "$PROMPT_CACHE_SIZE"
     ;;
   stop)
     if [ -f "$PIDFILE" ]; then
