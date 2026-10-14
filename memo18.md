@@ -1,22 +1,27 @@
 # Memo 18: Memo: Local LLM Hardware Tiers and Deployment Strategy
 
-Status: Proposed
-Repository: Local LLMs Management
+Status: Proposed. 
+Repository: Local LLMs Management  
 Purpose: Evaluate local AI hardware tiers, model capabilities, and the trade-offs between local inference and cloud subscriptions.
 
-1. Executive Summary
+## 1. Executive Summary
 
 Local AI hardware can be divided into three broad tiers:
 
-1. Entry-level: Approximately 8B-parameter models for private, straightforward conversational tasks.
-2. Mid-range: Quantized models in the 27B-parameter class and beyond, suitable for coding agents and practical development workflows.
-3. High-end: Systems with approximately 128GB of unified memory, capable of hosting models in the 70B–120B parameter range, depending on architecture, quantization, and runtime overhead.
+### 1. Entry-level: 
+Approximately 8B-parameter models for private, straightforward conversational tasks.
+
+### 2. Mid-range: 
+Quantized models in the 27B-parameter class and beyond, suitable for coding agents and practical development workflows.
+
+### 3. High-end: 
+Systems with approximately 128GB of unified memory, capable of hosting models in the 70B–120B parameter range, depending on architecture, quantization, and runtime overhead.
 
 The most important lesson is that model capacity, inference speed, and practical agent capability are different things. A model fitting into memory does not guarantee acceptable performance, and a faster model does not necessarily produce better results.
 
 For Local LLMs Management, the recommended strategy is to continue developing a hybrid workflow that combines local inference with subscription-based cloud models. Hardware purchases should follow demonstrated workload requirements rather than theoretical maximum model sizes.
 
-2. Three Hardware Tiers
+## 2. Three Hardware Tiers
 
 The following estimates are taken from the source material provided by Tim. They are indicative figures, not independently verified current market prices. Hardware prices, model performance, and available products change over time.
 
