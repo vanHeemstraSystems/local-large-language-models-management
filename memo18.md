@@ -1,6 +1,6 @@
 # Memo 18: Memo: Local LLM Hardware Tiers and Deployment Strategy
 
-Status: Proposed. 
+Status: Proposed  
 Repository: Local LLMs Management  
 Purpose: Evaluate local AI hardware tiers, model capabilities, and the trade-offs between local inference and cloud subscriptions.
 
